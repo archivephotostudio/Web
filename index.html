@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">ARCHIVE PHOTO — Dokumentasi Pernikahan Puitis & Abadi</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Playfair Display & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fafafa',
+                            100: '#f4f4f5',
+                            500: '#ffffff',
+                            600: '#d4d4d8',
+                            900: '#09090b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        ::selection {
+            background-color: #ffffff;
+            color: #09090b;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #09090b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ffffff;
+        }
+        .zoom-img-container {
+            overflow: hidden;
+        }
+        .zoom-img-container img {
+            transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zoom-img-container:hover img {
+            transform: scale(1.07);
+        }
+
+        /* Editorial Scroll Reveal Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: opacity, transform;
+        }
+        .reveal-left {
+            opacity: 0;
+            transform: translateX(-36px);
+            transition: opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1), transform 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: opacity, transform;
+        }
+        .reveal-right {
+            opacity: 0;
+            transform: translateX(36px);
+            transition: opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1), transform 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: opacity, transform;
+        }
+        .reveal-scale {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1), transform 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: opacity, transform;
+        }
+        .reveal.is-visible,
+        .reveal-left.is-visible,
+        .reveal-right.is-visible,
+        .reveal-scale.is-visible {
+            opacity: 1;
+            transform: translate(0, 0) scale(1);
+        }
+
+        /* Hero entrance animation */
+        @keyframes heroFadeUp {
+            0% { opacity: 0; transform: translateY(28px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes heroSlowZoom {
+            0% { transform: scale(1.1); }
+            100% { transform: scale(1.03); }
+        }
+        .hero-animate-bg {
+            animation: heroSlowZoom 8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .hero-stagger-1 { opacity: 0; animation: heroFadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards; }
+        .hero-stagger-2 { opacity: 0; animation: heroFadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards; }
+        .hero-stagger-3 { opacity: 0; animation: heroFadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards; }
+        .hero-stagger-4 { opacity: 0; animation: heroFadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.55s forwards; }
+
+        /* Smooth Gallery Item Fade-In */
+        @keyframes cardEntrance {
+            0% { opacity: 0; transform: translateY(20px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .gallery-card-anim {
+            opacity: 0;
+            animation: cardEntrance 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* Smooth Testimonial Track Transition */
+        #testimonial-track {
+            display: flex;
+            transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-sans antialiased overflow-x-hidden">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-500 ease-out pointer-events-none">
+        <div class="bg-zinc-900 border border-white text-zinc-100 px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3 max-w-md">
+            <span class="text-white text-xl"><i class="fab fa-whatsapp"></i></span>
+            <div>
+                <h4 class="font-semibold text-sm tracking-wide text-white">MENGALIHKAN KE WHATSAPP</h4>
+                <p id="toast-msg" class="text-xs text-zinc-400 mt-0.5">Membuka chat WhatsApp dengan detail rencana pernikahan Anda...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating WhatsApp Button -->
+    <a id="floating-wa-btn" href="#" target="_blank"
+       class="fixed bottom-6 right-6 z-40 bg-white text-zinc-950 hover:bg-zinc-200 px-5 py-3.5 rounded-full shadow-2xl shadow-black/70 border border-zinc-300 flex items-center gap-2.5 transition-all duration-500 hover:scale-105 hover:-translate-y-0.5 group">
+        <i class="fab fa-whatsapp text-xl transition-transform duration-300 group-hover:rotate-12"></i>
+        <span id="floating-wa-text" class="text-xs font-bold tracking-wider uppercase">Diskusi via WA</span>
+    </a>
+
+    <!-- Navigation Bar -->
+    <header id="main-navbar" class="fixed top-0 left-0 w-full z-40 bg-zinc-950/85 backdrop-blur-md border-b border-zinc-900 transition-all duration-500">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#home" id="header-brand-wrap" class="flex items-center space-x-2.5 group">
+                <img id="header-logo-img" src="" alt="Archive Photo Logo" class="h-9 w-auto object-contain hidden transition-transform duration-300 group-hover:scale-105">
+                <span id="header-logo-text" class="font-serif text-xl sm:text-2xl tracking-widest font-bold text-white group-hover:text-zinc-300 transition-colors">ARCHIVE PHOTO</span>
+                <span id="header-logo-dot" class="w-1.5 h-1.5 bg-white rounded-full"></span>
+            </a>
+
+            <!-- Desktop Menu -->
+            <nav class="hidden lg:flex items-center space-x-8 text-xs tracking-widest uppercase font-medium">
+                <a href="#home" class="text-zinc-400 hover:text-white transition-colors duration-300">Tentang</a>
+                <a href="#about" class="text-zinc-400 hover:text-white transition-colors duration-300">Filosofi</a>
+                <a href="#gallery" class="text-zinc-400 hover:text-white transition-colors duration-300">Karya</a>
+                <a href="#slider-section" class="text-zinc-400 hover:text-white transition-colors duration-300">Before After</a>
+                <a href="#testimonials" class="text-zinc-400 hover:text-white transition-colors duration-300">Testimoni</a>
+            </nav>
+
+            <!-- CTA Button Desktop -->
+            <div class="hidden lg:block">
+                <a href="#contact" class="px-6 py-2.5 bg-transparent border border-white/60 hover:border-white text-white hover:bg-white hover:text-zinc-950 text-xs tracking-widest uppercase font-semibold rounded-full transition-all duration-300">
+                    Mulai Diskusi
+                </a>
+            </div>
+
+            <!-- Mobile Menu Toggle Button -->
+            <button id="mobile-menu-btn" class="lg:hidden text-zinc-400 hover:text-white focus:outline-none transition-colors">
+                <i class="fa-solid fa-bars-staggered text-2xl"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Navigation Menu Dropdown -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-zinc-950/95 backdrop-blur-lg border-b border-zinc-900 py-6 px-6 absolute top-20 left-0 w-full flex flex-col space-y-4 text-xs tracking-widest uppercase font-medium shadow-xl">
+            <a href="#home" class="mobile-link py-2 text-zinc-400 hover:text-white transition-colors">Tentang</a>
+            <a href="#about" class="mobile-link py-2 text-zinc-400 hover:text-white transition-colors">Filosofi</a>
+            <a href="#gallery" class="mobile-link py-2 text-zinc-400 hover:text-white transition-colors">Karya</a>
+            <a href="#slider-section" class="mobile-link py-2 text-zinc-400 hover:text-white transition-colors">Before After</a>
+            <a href="#testimonials" class="mobile-link py-2 text-zinc-400 hover:text-white transition-colors">Testimoni</a>
+            <a href="#contact" class="mobile-link py-3 bg-white text-zinc-950 text-center font-bold tracking-widest rounded-lg transition-colors">MULAI DISKUSI</a>
+        </div>
+    </header>
+
+    <!-- Hero / Tentang Section -->
+    <section id="home" class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-gradient-to-b from-zinc-950/35 via-zinc-950/70 to-zinc-950 z-10"></div>
+            <img id="hero-bg-img" src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1920&q=80" 
+                 alt="Archive Photo Wedding Documentation" 
+                 class="w-full h-full object-cover object-center opacity-40 grayscale hero-animate-bg"
+                 onerror="this.src='https://placehold.co/1920x1080/18181b/ffffff?text=Archive+Photo'">
+        </div>
+
+        <div class="relative z-20 max-w-5xl mx-auto px-6 text-center mt-8">
+            <span id="hero-tagline" class="hero-stagger-1 inline-block text-zinc-300 text-xs md:text-sm tracking-[0.4em] uppercase mb-4 md:mb-6 font-semibold">WEDDING DOCUMENTATION ARCHIVE</span>
+            <h1 class="hero-stagger-2 font-serif text-4xl sm:text-6xl md:text-8xl font-bold tracking-tight leading-tight text-white mb-6">
+                <span id="hero-title-1">Merawat Setiap</span> <br>
+                <span id="hero-title-2" class="italic font-normal text-zinc-300">Rasa Bahagia</span> <span id="hero-title-3">Anda.</span>
+            </h1>
+            <p id="hero-desc" class="hero-stagger-3 text-sm sm:text-base md:text-lg text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+                Archive Photo adalah vendor dokumentasi khusus pernikahan yang berfokus merekam kehangatan, air mata haru, dan tawa tulus di hari sakral Anda agar tetap utuh untuk diceritakan kembali lintas generasi.
+            </p>
+            
+            <div class="hero-stagger-4 flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="#gallery" class="w-full sm:w-auto px-8 py-4 bg-white text-zinc-950 hover:bg-zinc-200 font-bold tracking-widest uppercase text-xs rounded-full transition-all duration-300 hover:scale-105 shadow-lg shadow-white/10">
+                    Jelajahi Karya
+                </a>
+                <a href="#contact" class="w-full sm:w-auto px-8 py-4 bg-zinc-900/90 hover:bg-zinc-800 text-white border border-zinc-700 hover:border-white font-semibold tracking-widest uppercase text-xs rounded-full transition-all duration-300 hover:scale-105">
+                    Mulai Diskusi
+                </a>
+            </div>
+        </div>
+
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center">
+            <span class="text-[9px] tracking-[0.3em] text-zinc-500 uppercase mb-2">Gulir Kebawah</span>
+            <div class="w-[1px] h-12 bg-gradient-to-b from-white to-transparent animate-pulse"></div>
+        </div>
+    </section>
+
+    <!-- Philosophy Section -->
+    <section id="about" class="py-24 bg-zinc-950 border-t border-zinc-900 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+                
+                <!-- Left Column: Editorial Wedding Visual -->
+                <div class="lg:col-span-5 space-y-6 relative reveal-left">
+                    <div class="relative z-10 zoom-img-container rounded-2xl border border-zinc-900 p-2 bg-zinc-900/30 backdrop-blur-sm">
+                        <img id="about-img" src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80" 
+                             alt="Wedding Philosophy Archive Photo" 
+                             class="rounded-xl w-full object-cover aspect-[3/4] grayscale hover:grayscale-0 transition-all duration-700"
+                             onerror="this.src='https://placehold.co/800x1066/18181b/ffffff?text=Archive+Photo'">
+                    </div>
+                    <div class="absolute -top-6 -left-6 w-24 h-24 border-t-2 border-l-2 border-white/30 rounded-tl-2xl -z-10"></div>
+                    <div class="absolute -bottom-6 -right-6 w-24 h-24 border-b-2 border-r-2 border-white/30 rounded-br-2xl -z-10"></div>
+                </div>
+
+                <!-- Right Column: Story & Philosophy Narrative -->
+                <div class="lg:col-span-7 space-y-8 reveal-right">
+                    <div class="space-y-3">
+                        <span class="text-zinc-400 text-xs tracking-[0.3em] font-semibold uppercase">THE WHY & FILOSOFI KAMI</span>
+                        <h2 id="about-headline" class="font-serif text-3xl sm:text-5xl font-bold leading-tight text-white">
+                            Karena Hari Pernikahan Berlalu Begitu Cepat, Namun <span class="italic text-zinc-300 font-normal">Rasa</span> Harus Tetap Tinggal.
+                        </h2>
+                    </div>
+
+                    <p id="about-bio" class="text-zinc-400 text-base leading-relaxed font-light">
+                        Bagi <strong class="text-white font-medium">Archive Photo</strong>, pernikahan bukan sekadar susunan acara formal atau deretan pose di pelaminan. Ia adalah titik temu paling jujur antara doa orang tua, genggaman tangan pasangan, dan senyum orang-orang terdekat yang hadir merayakan cinta Anda. Kami hadir bukan untuk mengatur ulang hari Anda, melainkan menjaga agar setiap detik kehangatan itu tersimpan utuh—sehingga bertahun-tahun kemudian, saat Anda membuka kembali arsip ini, perasaan hangat hari itu kembali hadir seutuhnya.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-4">
+                        <div class="space-y-2 border-l-2 border-white/60 pl-4 transition-transform duration-300 hover:translate-x-1">
+                            <h4 id="pillar-1-title" class="font-serif text-lg font-semibold text-white">Kejujuran Emosi & Candid</h4>
+                            <p id="pillar-1-desc" class="text-xs text-zinc-500 leading-relaxed">Menangkap tawa lepas, pelukan hangat, dan momen intim yang terjadi secara alami tanpa paksaan pose.</p>
+                        </div>
+                        <div class="space-y-2 border-l-2 border-white/60 pl-4 transition-transform duration-300 hover:translate-x-1">
+                            <h4 id="pillar-2-title" class="font-serif text-lg font-semibold text-white">Arsip Visual Tak Lekang Waktu</h4>
+                            <p id="pillar-2-desc" class="text-xs text-zinc-500 leading-relaxed">Komposisi bersih dan pewarnaan klasik yang tetap terasa elegan dan relevan hingga puluhan tahun mendatang.</p>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 flex items-center space-x-6">
+                        <div>
+                            <p id="about-name" class="font-serif text-lg italic text-white">Surohman</p>
+                            <p id="about-role" class="text-[10px] tracking-widest text-zinc-500 uppercase mt-0.5">Founder & Lead Wedding Storyteller</p>
+                        </div>
+                        <div class="h-8 w-[1px] bg-zinc-800"></div>
+                        <div class="flex space-x-4 text-zinc-400 text-sm">
+                            <a id="social-ig" href="#" target="_blank" class="hover:text-white transition-all duration-300 hover:scale-110"><i class="fab fa-instagram"></i></a>
+                            <a id="social-wa" href="#" target="_blank" class="hover:text-white transition-all duration-300 hover:scale-110"><i class="fab fa-whatsapp"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Karya / Gallery Section (3x2 Desktop = 6 items, 3x1 Mobile = 3 items, with "Karya Lainnya" button) -->
+    <section id="gallery" class="py-24 bg-zinc-950 border-t border-zinc-900">
+        <div class="max-w-7xl mx-auto px-6">
+            
+            <div class="text-center space-y-3 mb-16 reveal">
+                <span class="text-zinc-400 text-xs tracking-[0.3em] font-semibold uppercase">ARSIP KARYA PILIHAN</span>
+                <h2 class="font-serif text-3xl sm:text-5xl font-bold text-white">Kisah yang Telah Kami Abadikan</h2>
+                <p class="text-zinc-500 text-sm max-w-lg mx-auto">Setiap pasangan membawa cerita, suasana, dan perayaan cinta yang unik di setiap tempat.</p>
+            </div>
+
+            <!-- Filter Categories -->
+            <div id="gallery-filters" class="flex flex-wrap justify-center gap-2 md:gap-4 mb-12 reveal">
+                <!-- Rendered dynamically by JS -->
+            </div>
+
+            <!-- Gallery Grid: 1 col on mobile (3 rows = 3 items), 3 cols on desktop (2 rows = 6 items) -->
+            <div id="gallery-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-6 reveal">
+                <!-- Rendered dynamically by JS -->
+            </div>
+
+            <!-- "Karya Lainnya" Expand / Collapse Button -->
+            <div id="gallery-more-wrap" class="mt-12 text-center hidden reveal">
+                <button id="gallery-more-btn" onclick="toggleShowAllGallery()"
+                        class="px-8 py-3.5 bg-transparent border border-white/60 hover:border-white text-white hover:bg-white hover:text-zinc-950 text-xs tracking-widest uppercase font-semibold rounded-full transition-all duration-300 hover:scale-105 inline-flex items-center gap-2.5">
+                    <span id="gallery-more-text">Karya Lainnya</span>
+                    <i id="gallery-more-icon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300"></i>
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Before/After Slider Section -->
+    <section id="slider-section" class="py-24 bg-zinc-900/40 border-t border-zinc-900">
+        <div class="max-w-7xl mx-auto px-6">
+            
+            <div class="text-center space-y-3 mb-16 reveal">
+                <span class="text-zinc-400 text-xs tracking-[0.3em] font-semibold uppercase">KEAHLIAN EDITING & COLOR GRADING</span>
+                <h2 class="font-serif text-3xl sm:text-5xl font-bold text-white">Sentuhan Akhir Kamar Gelap</h2>
+                <p class="text-zinc-400 text-sm max-w-lg mx-auto">Geser tuas di bawah untuk melihat bagaimana file mentah (RAW) diolah menjadi arsip visual yang hangat dan berkarakter.</p>
+            </div>
+
+            <div class="max-w-3xl mx-auto relative select-none rounded-2xl overflow-hidden shadow-2xl border border-zinc-800 reveal-scale">
+                <div class="relative w-full aspect-[16/10] overflow-hidden" id="before-after-container">
+                    
+                    <!-- AFTER Image -->
+                    <img id="ba-after-img" src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80" 
+                         alt="Edited Wedding After" 
+                         class="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                         onerror="this.src='https://placehold.co/1200x750/111827/ffffff?text=Final+Archive'">
+                    
+                    <!-- BEFORE Image Container -->
+                    <div class="absolute inset-y-0 left-0 right-0 overflow-hidden pointer-events-none w-1/2" id="before-image-wrap">
+                        <img id="ba-before-img" src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80" 
+                             alt="RAW Wedding Before" 
+                             class="absolute inset-0 w-full h-full object-cover pointer-events-none filter saturate-50 brightness-75 contrast-75 sepia-[15%]"
+                             onerror="this.src='https://placehold.co/1200x750/3f3f46/ffffff?text=RAW+Before'">
+                    </div>
+
+                    <span class="absolute top-4 left-4 bg-zinc-950/85 backdrop-blur-md text-zinc-400 px-3 py-1 rounded text-[10px] tracking-widest font-bold border border-zinc-800">RAW ASLI</span>
+                    <span class="absolute top-4 right-4 bg-white text-zinc-950 px-3 py-1 rounded text-[10px] tracking-widest font-bold">ARCHIVE GRADE</span>
+
+                    <div class="absolute inset-y-0 left-1/2 w-1 bg-white cursor-ew-resize flex items-center justify-center -translate-x-1/2" id="slider-handle">
+                        <div class="w-10 h-10 rounded-full bg-white text-zinc-950 flex items-center justify-center shadow-lg border-2 border-zinc-950 transition-transform duration-200 hover:scale-110">
+                            <i class="fa-solid fa-arrows-left-right text-xs"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Testimonials Section: "Our Client Happy" (Smooth Sliding Track: 3 on Desktop, 2 on Mobile) -->
+    <section id="testimonials" class="py-24 bg-zinc-950 border-t border-zinc-900">
+        <div class="max-w-7xl mx-auto px-6">
+            
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14 reveal">
+                <div class="space-y-3">
+                    <span class="text-zinc-400 text-xs tracking-[0.3em] font-semibold uppercase">CERITA DARI PASANGAN KAMI</span>
+                    <h2 class="font-serif text-3xl sm:text-5xl font-bold text-white">Our Client Happy</h2>
+                    <p class="text-zinc-500 text-sm max-w-lg">Kesan tulus dari para pengantin yang telah mempercayakan hari bahagianya kepada Archive Photo.</p>
+                </div>
+
+                <!-- Carousel Navigation Buttons -->
+                <div class="flex items-center gap-3 self-start md:self-end">
+                    <button onclick="prevTestimonialPage()" aria-label="Testimoni Sebelumnya"
+                            class="w-11 h-11 rounded-full bg-zinc-900 hover:bg-white text-white hover:text-zinc-950 border border-zinc-800 hover:border-white flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95">
+                        <i class="fa-solid fa-arrow-left text-xs"></i>
+                    </button>
+                    <button onclick="nextTestimonialPage()" aria-label="Testimoni Berikutnya"
+                            class="w-11 h-11 rounded-full bg-zinc-900 hover:bg-white text-white hover:text-zinc-950 border border-zinc-800 hover:border-white flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95">
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Smooth Horizontal Carousel Viewport -->
+            <div class="overflow-hidden reveal">
+                <div id="testimonial-track">
+                    <!-- Rendered dynamically by JS -->
+                </div>
+            </div>
+
+            <!-- Pagination Dots -->
+            <div id="testimonial-dots" class="flex justify-center space-x-2 pt-8 reveal">
+                <!-- Rendered dynamically by JS -->
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Contact & Direct WhatsApp Discussion Section -->
+    <section id="contact" class="py-24 bg-zinc-900/35 border-t border-zinc-900">
+        <div class="max-w-7xl mx-auto px-6">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+                
+                <!-- Left: Info -->
+                <div class="lg:col-span-5 space-y-8 reveal-left">
+                    <div class="space-y-3">
+                        <span class="text-zinc-400 text-xs tracking-[0.3em] font-semibold uppercase">TERHUBUNG DENGAN KAMI</span>
+                        <h2 id="form-section-title" class="font-serif text-3xl sm:text-5xl font-bold text-white">Mulai Diskusi</h2>
+                        <p id="form-section-subtitle" class="text-zinc-400 text-sm leading-relaxed font-light">
+                            Ceritakan rencana hari pernikahan Anda melalui formulir di samping. Detail yang Anda isi akan langsung terhubung ke WhatsApp tim Archive Photo untuk pengecekan tanggal dan pengiriman pricelist lengkap.
+                        </p>
+                    </div>
+
+                    <div class="space-y-6 pt-6">
+                        <div class="flex items-start space-x-4 group">
+                            <span class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 group-hover:border-white flex items-center justify-center text-white shrink-0 transition-colors duration-300"><i class="fa-solid fa-map-location-dot"></i></span>
+                            <div>
+                                <h5 class="text-xs font-bold tracking-wider uppercase text-white">Basis Operasional</h5>
+                                <p id="contact-address" class="text-xs text-zinc-500 mt-1 leading-relaxed">Jakarta Timur, DKI Jakarta (Melayani Jabodetabek & Destination Wedding)</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4 group">
+                            <span class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 group-hover:border-white flex items-center justify-center text-white shrink-0 transition-colors duration-300"><i class="fa-solid fa-envelope-open-text"></i></span>
+                            <div>
+                                <h5 class="text-xs font-bold tracking-wider uppercase text-white">Korespondensi Email</h5>
+                                <p id="contact-email" class="text-xs text-zinc-400 mt-1">hello@archivephoto.id</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4 group">
+                            <span class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 group-hover:border-white flex items-center justify-center text-white shrink-0 transition-colors duration-300"><i class="fab fa-whatsapp"></i></span>
+                            <div>
+                                <h5 class="text-xs font-bold tracking-wider uppercase text-white">WhatsApp Konsultasi</h5>
+                                <p id="contact-wa-display" class="text-xs text-zinc-400 mt-1">+62 812-3456-7890</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Wedding Inquiry Form -->
+                <div class="lg:col-span-7 bg-zinc-950 border border-zinc-900 p-8 sm:p-10 rounded-2xl shadow-xl reveal-right">
+                    <form id="booking-form" onsubmit="handleWhatsAppRedirect(event)" class="space-y-5">
+                        
+                        <!-- Row 1: Nama & Jenis Sesi Foto -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div class="space-y-2">
+                                <label for="form-name" class="text-[10px] tracking-widest font-semibold text-zinc-400 uppercase">NAMA PASANGAN / ANDA</label>
+                                <input type="text" id="form-name" required placeholder="Contoh: Raka & Nadya" 
+                                       class="w-full bg-zinc-900/80 border border-zinc-800 text-sm text-white px-4 py-3.5 rounded-xl focus:border-white focus:outline-none transition-colors duration-300 placeholder:text-zinc-600">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="form-session" class="text-[10px] tracking-widest font-semibold text-zinc-400 uppercase">JENIS SESI FOTO</label>
+                                <select id="form-session" required 
+                                        class="w-full bg-zinc-900/80 border border-zinc-800 text-sm text-zinc-200 px-4 py-3.5 rounded-xl focus:border-white focus:outline-none transition-colors duration-300">
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Output & Range Budget -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div class="space-y-2">
+                                <label for="form-output" class="text-[10px] tracking-widest font-semibold text-zinc-400 uppercase">OUTPUT YANG DIINGINKAN</label>
+                                <select id="form-output" required onchange="toggleCustomOutputField()"
+                                        class="w-full bg-zinc-900/80 border border-zinc-800 text-sm text-zinc-200 px-4 py-3.5 rounded-xl focus:border-white focus:outline-none transition-colors duration-300">
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="form-budget" class="text-[10px] tracking-widest font-semibold text-zinc-400 uppercase">RANGE BUDGET</label>
+                                <select id="form-budget" required 
+                                        class="w-full bg-zinc-900/80 border border-zinc-800 text-sm text-zinc-200 px-4 py-3.5 rounded-xl focus:border-white focus:outline-none transition-colors duration-300">
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Conditional Custom Output Input -->
+                        <div id="custom-output-wrap" class="hidden space-y-2">
+                            <label for="form-custom-output" class="text-[10px] tracking-widest font-semibold text-white uppercase">DETAIL OUTPUT CUSTOM</label>
+                            <input type="text" id="form-custom-output" placeholder="Tuliskan output khusus yang Anda butuhkan (misal: Same Day Edit, Cetak Kanvas, dll)" 
+                                   class="w-full bg-zinc-900/80 border border-zinc-700 text-sm text-white px-4 py-3.5 rounded-xl focus:border-white focus:outline-none transition-colors duration-300 placeholder:text-zinc-600">
+                        </div>
+
+                        <!-- Row 3: Rencana Tanggal Acara & Lokasi/Venue -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div class="space-y-2">
+                                <label for="form-date" class="text-[10px] tracking-widest font-semibold text-zinc-400 uppercase">RENCANA TANGGAL ACARA</label>
+                                <input type="date" id="form-date" required
+                                       class="w-full bg-zinc-900/80 border border-zinc-800 text-sm text-zinc-300 px-4 py-3.5 rounded-xl focus:border-white focus:outline-none transition-colors duration-300">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="form-location" class="text-[10px] tracking-widest font-semibold text-zinc-400 uppercase">LOKASI / VENUE</label>
+                                <input type="text" id="form-location" required placeholder="Contoh: Gedung / Hotel / Rumah, Jakarta" 
+                                       class="w-full bg-zinc-900/80 border border-zinc-800 text-sm text-white px-4 py-3.5 rounded-xl focus:border-white focus:outline-none transition-colors duration-300 placeholder:text-zinc-600">
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Konsep atau Detail Kebutuhan -->
+                        <div class="space-y-2">
+                            <label for="form-msg" class="text-[10px] tracking-widest font-semibold text-zinc-400 uppercase">KONSEP ATAU DETAIL KEBUTUHAN</label>
+                            <textarea id="form-msg" rows="4" placeholder="Ceritakan gambaran konsep acara (adat/internasional/intimate), estimasi jam acara, atau kebutuhan khusus lainnya..." 
+                                      class="w-full bg-zinc-900/80 border border-zinc-800 text-sm text-white px-4 py-3.5 rounded-xl focus:border-white focus:outline-none transition-colors duration-300 placeholder:text-zinc-600"></textarea>
+                        </div>
+
+                        <button type="submit" id="form-submit-btn" class="w-full py-4 bg-white text-zinc-950 font-bold tracking-widest uppercase text-xs rounded-xl hover:bg-zinc-200 transition-all duration-300 hover:scale-[1.01] shadow-lg shadow-white/10 flex items-center justify-center gap-2">
+                            <i class="fab fa-whatsapp text-base"></i> <span id="form-submit-text">MULAI DISKUSI VIA WHATSAPP</span>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Minimal Monochrome Footer -->
+    <footer class="bg-zinc-950 border-t border-zinc-900 py-12">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+            
+            <a href="#home" class="flex items-center space-x-2">
+                <img id="footer-logo-img" src="" alt="Archive Photo Logo" class="h-7 w-auto object-contain hidden">
+                <span id="footer-logo-text" class="font-serif text-xl tracking-widest font-bold text-white">ARCHIVE PHOTO</span>
+                <span id="footer-logo-dot" class="w-1.5 h-1.5 bg-white rounded-full"></span>
+            </a>
+
+            <p id="footer-copy" class="text-xs text-zinc-500 text-center">
+                &copy; 2026 ARCHIVE PHOTO. Wedding Documentation Archive.
+            </p>
+
+            <div class="flex space-x-6 text-zinc-500 text-xs tracking-widest uppercase">
+                <a href="admin.html" class="hover:text-white transition-colors" title="Panel Admin"><i class="fa-solid fa-lock mr-1"></i> Admin</a>
+            </div>
+
+        </div>
+    </footer>
+
+    <!-- Fullscreen Lightbox Modal Overlay -->
+    <div id="lightbox" class="fixed inset-0 bg-zinc-950/98 backdrop-blur-xl z-50 flex flex-col justify-between p-6 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="flex justify-between items-center">
+            <span class="text-[10px] tracking-[0.4em] text-zinc-500 uppercase" id="lightbox-counter">KARYA 1 DARI 6</span>
+            <button onclick="closeLightbox()" class="w-12 h-12 rounded-full bg-zinc-900/70 hover:bg-zinc-800 text-white flex items-center justify-center text-lg transition-colors focus:outline-none">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="relative flex-1 flex items-center justify-center max-h-[70vh]">
+            <button onclick="prevLightboxImage()" class="absolute left-0 md:left-6 w-12 h-12 rounded-full bg-zinc-900/70 hover:bg-zinc-800 text-white flex items-center justify-center text-sm transition-colors focus:outline-none z-20">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+
+            <img id="lightbox-img" src="" alt="Fullscreen view" class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl z-10 transition-opacity duration-300">
+
+            <button onclick="nextLightboxImage()" class="absolute right-0 md:right-6 w-12 h-12 rounded-full bg-zinc-900/70 hover:bg-zinc-800 text-white flex items-center justify-center text-sm transition-colors focus:outline-none z-20">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="max-w-2xl mx-auto w-full text-center space-y-3 pb-4">
+            <div>
+                <span class="text-zinc-400 text-[9px] tracking-widest uppercase font-bold" id="lightbox-category">WEDDING</span>
+                <h3 class="font-serif text-xl font-bold text-white mt-0.5" id="lightbox-title">Raka & Nadya</h3>
+            </div>
+            <!-- Metadata Karya: Nama, Lokasi, Tahun -->
+            <div class="flex justify-center items-center space-x-6 text-xs text-zinc-400 border-t border-zinc-900 pt-3">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-heart text-white"></i> <span id="lightbox-couple">Raka & Nadya</span></span>
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-location-dot text-white"></i> <span id="lightbox-location">Jakarta</span></span>
+                <span class="flex items-center gap-1.5"><i class="fa-regular fa-calendar text-white"></i> <span id="lightbox-year">2026</span></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DEFAULT SITE CONFIGURATION (Archive Photo)
+        // ==========================================
+        const STORAGE_KEY = 'archive_photo_cms_v1';
+
+        const DEFAULT_DATA = {
+            brandName: "ARCHIVE PHOTO",
+            logoUrl: "",
+            hideTextWhenLogoExists: false,
+            heroTagline: "WEDDING DOCUMENTATION ARCHIVE",
+            heroTitle1: "Merawat Setiap",
+            heroTitle2: "Rasa Bahagia",
+            heroTitle3: "Anda.",
+            heroDesc: "Archive Photo adalah vendor dokumentasi khusus pernikahan yang berfokus merekam kehangatan, air mata haru, dan tawa tulus di hari sakral Anda agar tetap utuh untuk diceritakan kembali lintas generasi.",
+            heroBg: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1920&q=80",
+            aboutImg: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
+            aboutHeadline: 'Karena Hari Pernikahan Berlalu Begitu Cepat, Namun <span class="italic text-zinc-300 font-normal">Rasa</span> Harus Tetap Tinggal.',
+            aboutBio: 'Bagi <strong class="text-white font-medium">Archive Photo</strong>, pernikahan bukan sekadar susunan acara formal atau deretan pose di pelaminan. Ia adalah titik temu paling jujur antara doa orang tua, genggaman tangan pasangan, dan senyum orang-orang terdekat yang hadir merayakan cinta Anda. Kami hadir bukan untuk mengatur ulang hari Anda, melainkan menjaga agar setiap detik kehangatan itu tersimpan utuh—sehingga bertahun-tahun kemudian, saat Anda membuka kembali arsip ini, perasaan hangat hari itu kembali hadir seutuhnya.',
+            pillar1Title: "Kejujuran Emosi & Candid",
+            pillar1Desc: "Menangkap tawa lepas, pelukan hangat, dan momen intim yang terjadi secara alami tanpa paksaan pose.",
+            pillar2Title: "Arsip Visual Tak Lekang Waktu",
+            pillar2Desc: "Komposisi bersih dan pewarnaan klasik yang tetap terasa elegan dan relevan hingga puluhan tahun mendatang.",
+            aboutName: "Surohman",
+            aboutRole: "Founder & Lead Wedding Storyteller",
+            baBeforeImg: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+            baAfterImg: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+            baUseFilterOnBefore: true,
+            whatsappNumber: "6281234567890",
+            whatsappDisplay: "+62 812-3456-7890",
+            floatingWaEnabled: true,
+            floatingWaText: "Diskusi via WA",
+            floatingWaPrefill: "Halo Archive Photo, saya ingin berdiskusi mengenai dokumentasi pernikahan kami.",
+            email: "hello@archivephoto.id",
+            address: "Jakarta Timur, DKI Jakarta (Melayani Jabodetabek & Destination Wedding)",
+            instagramUrl: "https://instagram.com/",
+            formSectionTitle: "Mulai Diskusi",
+            formSectionSubtitle: "Ceritakan rencana hari pernikahan Anda melalui formulir di samping. Detail yang Anda isi akan langsung terhubung ke WhatsApp tim Archive Photo untuk pengecekan tanggal dan pengiriman pricelist lengkap.",
+            formSubmitText: "MULAI DISKUSI VIA WHATSAPP",
+            sessionOptions: [
+                "Akad Saja",
+                "Resepsi Saja",
+                "Akad & Resepsi"
+            ],
+            outputOptions: [
+                "Foto Saja",
+                "Foto & Album",
+                "Foto & Video",
+                "Lengkap (Foto, Video, & Album)",
+                "Custom"
+            ],
+            budgetOptions: [
+                "Di bawah Rp 5 Juta",
+                "Rp 5 Juta – Rp 8 Juta",
+                "Rp 8 Juta – Rp 12 Juta",
+                "Di atas Rp 12 Juta",
+                "Diskusikan Sesuai Kebutuhan"
+            ],
+            gallery: [
+                {
+                    src: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+                    title: "Raka & Nadya",
+                    category: "AKAD & RESEPSI",
+                    location: "Jakarta Selatan",
+                    year: "2026"
+                },
+                {
+                    src: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
+                    title: "Dimas & Laras",
+                    category: "INTIMATE WEDDING",
+                    location: "Bogor",
+                    year: "2026"
+                },
+                {
+                    src: "https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&w=1200&q=80",
+                    title: "Fajar & Aulia",
+                    category: "AKAD NIKAH",
+                    location: "Jakarta Timur",
+                    year: "2025"
+                },
+                {
+                    src: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1200&q=80",
+                    title: "Bagas & Kirana",
+                    category: "RESEPSI",
+                    location: "Bekasi",
+                    year: "2025"
+                },
+                {
+                    src: "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=1200&q=80",
+                    title: "Alvin & Sekar",
+                    category: "AKAD & RESEPSI",
+                    location: "Tangerang",
+                    year: "2025"
+                },
+                {
+                    src: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1200&q=80",
+                    title: "Hendra & Nisa",
+                    category: "INTIMATE WEDDING",
+                    location: "Bandung",
+                    year: "2024"
+                },
+                {
+                    src: "https://images.unsplash.com/photo-1529636798458-92182e662485?auto=format&fit=crop&w=1200&q=80",
+                    title: "Reza & Salsabila",
+                    category: "AKAD & RESEPSI",
+                    location: "Jakarta Pusat",
+                    year: "2024"
+                }
+            ],
+            testimonials: [
+                {
+                    quote: "Tim Archive Photo benar-benar bikin kami nyaman sepanjang acara. Nggak terasa diarahkan kaku, tapi semua momen haru pas sungkeman dan tawa keluarga ketangkap dengan sangat hangat.",
+                    author: "Raka & Nadya",
+                    event: "Akad & Resepsi · Jakarta"
+                },
+                {
+                    quote: "Hasil foto dan albumnya clean banget, timeless! Pas dilihat bareng orang tua setelah acara, rasanya seperti mengulang kembali kebahagiaan hari itu.",
+                    author: "Dimas & Laras",
+                    event: "Intimate Wedding · Bogor"
+                },
+                {
+                    quote: "Komunikasinya enak dari awal diskusi sampai file selesai dikirim. Tepat waktu dan detail-detail kecil yang sempat terlewat oleh kami justru berhasil diabadikan dengan manis.",
+                    author: "Fajar & Aulia",
+                    event: "Akad Nikah · Jakarta Timur"
+                },
+                {
+                    quote: "Suka banget sama tone warnanya yang natural dan elegan. Timnya juga sigap dan ramah ke keluarga besar kami selama resepsi berlangsung.",
+                    author: "Bagas & Kirana",
+                    event: "Resepsi · Bekasi"
+                },
+                {
+                    quote: "Dari sesi akad pagi sampai resepsi malam, energinya tetap positif dan sabar banget ngarahin keluarga besar kami yang banyak.",
+                    author: "Alvin & Sekar",
+                    event: "Akad & Resepsi · Tangerang"
+                }
+            ],
+            gasWebhookUrl: "",
+            driveFolderId: ""
+        };
+
+        let siteData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEFAULT_DATA;
+        let currentCategory = 'ALL';
+        let filteredGallery = [];
+        let showAllGallery = false;
+        let currentLightboxIndex = 0;
+        let currentTestimonialIndex = 0;
+
+        // ==========================================
+        // SCROLL REVEAL OBSERVER (SMOOTH ENTRANCE)
+        // ==========================================
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+        function initScrollReveal() {
+            document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => {
+                revealObserver.observe(el);
+            });
+        }
+
+        // ==========================================
+        // RENDER SITE FROM DATA
+        // ==========================================
+        function applySiteData(data) {
+            document.getElementById('page-title').textContent = `${data.brandName} — Dokumentasi Pernikahan`;
+            
+            // Logo Handling
+            const hImg = document.getElementById('header-logo-img');
+            const hTxt = document.getElementById('header-logo-text');
+            const hDot = document.getElementById('header-logo-dot');
+            const fImg = document.getElementById('footer-logo-img');
+            const fTxt = document.getElementById('footer-logo-text');
+            const fDot = document.getElementById('footer-logo-dot');
+
+            hTxt.textContent = data.brandName;
+            fTxt.textContent = data.brandName;
+
+            if (data.logoUrl && data.logoUrl.trim() !== "") {
+                hImg.src = data.logoUrl;
+                fImg.src = data.logoUrl;
+                hImg.classList.remove('hidden');
+                fImg.classList.remove('hidden');
+                if (data.hideTextWhenLogoExists) {
+                    hTxt.classList.add('hidden');
+                    hDot.classList.add('hidden');
+                    fTxt.classList.add('hidden');
+                    fDot.classList.add('hidden');
+                } else {
+                    hTxt.classList.remove('hidden');
+                    hDot.classList.remove('hidden');
+                    fTxt.classList.remove('hidden');
+                    fDot.classList.remove('hidden');
+                }
+            } else {
+                hImg.classList.add('hidden');
+                fImg.classList.add('hidden');
+                hTxt.classList.remove('hidden');
+                hDot.classList.remove('hidden');
+                fTxt.classList.remove('hidden');
+                fDot.classList.remove('hidden');
+            }
+
+            // Floating WhatsApp Button
+            const floatBtn = document.getElementById('floating-wa-btn');
+            const cleanWa = (data.whatsappNumber || '6281234567890').replace(/[^0-9]/g, '');
+            if (data.floatingWaEnabled !== false) {
+                floatBtn.classList.remove('hidden');
+                document.getElementById('floating-wa-text').textContent = data.floatingWaText || 'Diskusi via WA';
+                const prefill = encodeURIComponent(data.floatingWaPrefill || `Halo ${data.brandName}, saya ingin berdiskusi mengenai dokumentasi pernikahan.`);
+                floatBtn.href = `https://wa.me/${cleanWa}?text=${prefill}`;
+            } else {
+                floatBtn.classList.add('hidden');
+            }
+
+            // Hero & About
+            document.getElementById('hero-tagline').textContent = data.heroTagline;
+            document.getElementById('hero-title-1').textContent = data.heroTitle1;
+            document.getElementById('hero-title-2').textContent = data.heroTitle2;
+            document.getElementById('hero-title-3').textContent = data.heroTitle3;
+            document.getElementById('hero-desc').textContent = data.heroDesc;
+            document.getElementById('hero-bg-img').src = data.heroBg;
+
+            document.getElementById('about-img').src = data.aboutImg;
+            document.getElementById('about-headline').innerHTML = data.aboutHeadline;
+            document.getElementById('about-bio').innerHTML = data.aboutBio;
+            document.getElementById('pillar-1-title').textContent = data.pillar1Title;
+            document.getElementById('pillar-1-desc').textContent = data.pillar1Desc;
+            document.getElementById('pillar-2-title').textContent = data.pillar2Title;
+            document.getElementById('pillar-2-desc').textContent = data.pillar2Desc;
+            document.getElementById('about-name').textContent = data.aboutName;
+            document.getElementById('about-role').textContent = data.aboutRole;
+
+            // Socials & Contact
+            document.getElementById('social-ig').href = data.instagramUrl || '#';
+            document.getElementById('social-wa').href = `https://wa.me/${cleanWa}`;
+            document.getElementById('contact-address').textContent = data.address;
+            document.getElementById('contact-email').textContent = data.email;
+            document.getElementById('contact-wa-display').textContent = data.whatsappDisplay;
+            document.getElementById('footer-copy').innerHTML = `&copy; 2026 ${data.brandName}. Wedding Documentation Archive.`;
+
+            // Before / After
+            const beforeImg = document.getElementById('ba-before-img');
+            document.getElementById('ba-after-img').src = data.baAfterImg;
+            beforeImg.src = data.baBeforeImg;
+            if (data.baUseFilterOnBefore) {
+                beforeImg.classList.add('filter', 'saturate-50', 'brightness-75', 'contrast-75', 'sepia-[15%]');
+            } else {
+                beforeImg.classList.remove('filter', 'saturate-50', 'brightness-75', 'contrast-75', 'sepia-[15%]');
+            }
+
+            // Form Texts & Dropdowns
+            document.getElementById('form-section-title').textContent = data.formSectionTitle || "Mulai Diskusi";
+            document.getElementById('form-section-subtitle').textContent = data.formSectionSubtitle || "";
+            document.getElementById('form-submit-text').textContent = data.formSubmitText || "MULAI DISKUSI VIA WHATSAPP";
+
+            const sessionSelect = document.getElementById('form-session');
+            sessionSelect.innerHTML = `<option value="" disabled selected>Pilih Jenis Sesi...</option>` +
+                (data.sessionOptions || ["Akad Saja", "Resepsi Saja", "Akad & Resepsi"]).map(opt => `<option value="${opt}">${opt}</option>`).join('');
+
+            const outputSelect = document.getElementById('form-output');
+            outputSelect.innerHTML = `<option value="" disabled selected>Pilih Output...</option>` +
+                (data.outputOptions || ["Foto Saja", "Foto & Album", "Foto & Video", "Lengkap (Foto, Video, & Album)", "Custom"]).map(opt => `<option value="${opt}">${opt}</option>`).join('');
+
+            const budgetSelect = document.getElementById('form-budget');
+            budgetSelect.innerHTML = `<option value="" disabled selected>Pilih Range Budget...</option>` +
+                (data.budgetOptions || ["Di bawah Rp 5 Juta", "Rp 5 Juta – Rp 8 Juta", "Rp 8 Juta – Rp 12 Juta", "Di atas Rp 12 Juta", "Diskusikan Sesuai Kebutuhan"]).map(opt => `<option value="${opt}">${opt}</option>`).join('');
+
+            renderGalleryFilters();
+            renderGalleryGrid();
+            renderTestimonials();
+        }
+
+        function toggleCustomOutputField() {
+            const val = document.getElementById('form-output').value.toLowerCase();
+            const wrap = document.getElementById('custom-output-wrap');
+            if (val.includes('custom')) {
+                wrap.classList.remove('hidden');
+            } else {
+                wrap.classList.add('hidden');
+            }
+        }
+
+        // ==========================================
+        // GALLERY / KARYA (3x2 Desktop = 6, 3x1 Mobile = 3, + "Karya Lainnya")
+        // ==========================================
+        function getInitialGalleryLimit() {
+            return window.innerWidth >= 1024 ? 6 : 3;
+        }
+
+        function renderGalleryFilters() {
+            const categories = ['ALL', ...new Set(siteData.gallery.map(item => item.category.toUpperCase()))];
+            const filterWrap = document.getElementById('gallery-filters');
+            filterWrap.innerHTML = categories.map(cat => {
+                const isActive = currentCategory === cat;
+                const label = cat === 'ALL' ? 'Semua Karya' : cat;
+                const cls = isActive
+                    ? "px-6 py-2.5 rounded-full text-xs tracking-widest uppercase font-semibold border transition-all duration-300 bg-white text-zinc-950 border-white scale-105"
+                    : "px-6 py-2.5 rounded-full text-xs tracking-widest uppercase font-semibold border transition-all duration-300 bg-transparent text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-600";
+                return `<button onclick="filterGallery('${cat}')" class="${cls}">${label}</button>`;
+            }).join('');
+        }
+
+        function filterGallery(cat) {
+            currentCategory = cat;
+            showAllGallery = false;
+            renderGalleryFilters();
+            renderGalleryGrid();
+        }
+
+        function toggleShowAllGallery() {
+            showAllGallery = !showAllGallery;
+            renderGalleryGrid();
+            if (!showAllGallery) {
+                document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function renderGalleryGrid() {
+            filteredGallery = currentCategory === 'ALL'
+                ? siteData.gallery
+                : siteData.gallery.filter(item => item.category.toUpperCase() === currentCategory);
+
+            const limit = getInitialGalleryLimit();
+            const itemsToShow = showAllGallery ? filteredGallery : filteredGallery.slice(0, limit);
+
+            const grid = document.getElementById('gallery-grid');
+            grid.innerHTML = itemsToShow.map((item, idx) => `
+                <div class="gallery-item gallery-card-anim group relative cursor-pointer overflow-hidden rounded-xl bg-zinc-900 border border-zinc-900"
+                     style="animation-delay: ${Math.min(idx * 80, 480)}ms"
+                     onclick="openLightbox(${idx})">
+                    <div class="zoom-img-container aspect-[3/4]">
+                        <img src="${item.src}" alt="${item.title}" class="w-full h-full object-cover"
+                             onerror="this.src='https://placehold.co/800x1066/18181b/ffffff?text=${encodeURIComponent(item.title)}'">
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
+                        <span class="text-zinc-300 text-[10px] tracking-widest uppercase font-bold mb-1 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">${item.category}</span>
+                        <h4 class="font-serif text-xl font-semibold text-white mb-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">${item.title}</h4>
+                        <div class="flex items-center justify-between text-[11px] text-zinc-400 border-t border-zinc-800 pt-3 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                            <span><i class="fa-solid fa-location-dot mr-1.5 text-white"></i>${item.location || '-'}</span>
+                            <span><i class="fa-regular fa-calendar mr-1.5 text-white"></i>${item.year || '-'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            const moreWrap = document.getElementById('gallery-more-wrap');
+            const moreText = document.getElementById('gallery-more-text');
+            const moreIcon = document.getElementById('gallery-more-icon');
+
+            if (filteredGallery.length > limit) {
+                moreWrap.classList.remove('hidden');
+                if (showAllGallery) {
+                    moreText.textContent = 'Tampilkan Lebih Ringkas';
+                    moreIcon.classList.add('rotate-180');
+                } else {
+                    const remaining = filteredGallery.length - limit;
+                    moreText.textContent = `Karya Lainnya (+${remaining})`;
+                    moreIcon.classList.remove('rotate-180');
+                }
+            } else {
+                moreWrap.classList.add('hidden');
+            }
+        }
+
+        const lightbox = document.getElementById('lightbox');
+        function openLightbox(index) {
+            currentLightboxIndex = index;
+            updateLightboxContent();
+            lightbox.classList.remove('pointer-events-none');
+            lightbox.classList.add('opacity-100');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove('opacity-100');
+            lightbox.classList.add('pointer-events-none');
+            document.body.style.overflow = 'auto';
+        }
+
+        function updateLightboxContent() {
+            const data = filteredGallery[currentLightboxIndex];
+            if (!data) return;
+            const imgEl = document.getElementById('lightbox-img');
+            imgEl.style.opacity = '0.3';
+            setTimeout(() => {
+                imgEl.src = data.src;
+                imgEl.style.opacity = '1';
+            }, 120);
+            document.getElementById('lightbox-counter').textContent = `KARYA ${currentLightboxIndex + 1} DARI ${filteredGallery.length}`;
+            document.getElementById('lightbox-title').textContent = data.title;
+            document.getElementById('lightbox-category').textContent = data.category;
+            document.getElementById('lightbox-couple').textContent = data.title;
+            document.getElementById('lightbox-location').textContent = data.location || '-';
+            document.getElementById('lightbox-year').textContent = data.year || '-';
+        }
+
+        function nextLightboxImage() {
+            currentLightboxIndex = (currentLightboxIndex + 1) % filteredGallery.length;
+            updateLightboxContent();
+        }
+
+        function prevLightboxImage() {
+            currentLightboxIndex = (currentLightboxIndex - 1 + filteredGallery.length) % filteredGallery.length;
+            updateLightboxContent();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (lightbox.classList.contains('opacity-100')) {
+                if (e.key === 'ArrowRight') nextLightboxImage();
+                if (e.key === 'ArrowLeft') prevLightboxImage();
+                if (e.key === 'Escape') closeLightbox();
+            }
+        });
+
+        // ==========================================
+        // SMOOTH SLIDING TESTIMONIALS CAROUSEL (3 Desktop, 2 Mobile)
+        // ==========================================
+        function getTestimonialsPerView() {
+            return window.innerWidth >= 1024 ? 3 : 2;
+        }
+
+        function renderTestimonials() {
+            const list = siteData.testimonials || [];
+            const track = document.getElementById('testimonial-track');
+            const dotsWrap = document.getElementById('testimonial-dots');
+
+            if (list.length === 0) {
+                track.innerHTML = '';
+                dotsWrap.innerHTML = '';
+                return;
+            }
+
+            const perView = getTestimonialsPerView();
+            const maxStartIndex = Math.max(0, list.length - perView);
+            if (currentTestimonialIndex > maxStartIndex) currentTestimonialIndex = 0;
+
+            const cardWidthPercent = 100 / perView;
+
+            track.innerHTML = list.map(t => `
+                <div style="flex: 0 0 ${cardWidthPercent}%; max-width: ${cardWidthPercent}%;" class="px-2 sm:px-3">
+                    <div class="h-full bg-zinc-900/50 border border-zinc-800/90 hover:border-zinc-600 rounded-2xl p-5 sm:p-7 flex flex-col justify-between transition-all duration-500 hover:-translate-y-1">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="font-serif text-4xl text-zinc-700 leading-none select-none">“</span>
+                                <div class="flex text-white text-[10px] gap-0.5">
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed font-light italic">
+                                "${t.quote}"
+                            </p>
+                        </div>
+                        <div class="border-t border-zinc-800/80 pt-4 mt-6">
+                            <h5 class="font-serif text-sm sm:text-base font-bold text-white">${t.author}</h5>
+                            <p class="text-[10px] tracking-widest text-zinc-500 uppercase mt-0.5">${t.event || t.role || 'Wedding Client'}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            updateTestimonialPosition();
+
+            const totalPositions = maxStartIndex + 1;
+            dotsWrap.innerHTML = Array.from({ length: totalPositions }).map((_, i) => `
+                <button onclick="setTestimonialIndex(${i})" class="h-1.5 rounded-full transition-all duration-500 ${i === currentTestimonialIndex ? 'w-7 bg-white' : 'w-1.5 bg-zinc-800 hover:bg-zinc-600'}" aria-label="Geser Testimoni ${i + 1}"></button>
+            `).join('');
+        }
+
+        function updateTestimonialPosition() {
+            const track = document.getElementById('testimonial-track');
+            const perView = getTestimonialsPerView();
+            const offsetPercent = currentTestimonialIndex * (100 / perView);
+            track.style.transform = `translateX(-${offsetPercent}%)`;
+        }
+
+        function nextTestimonialPage() {
+            const list = siteData.testimonials || [];
+            const perView = getTestimonialsPerView();
+            const maxStartIndex = Math.max(0, list.length - perView);
+            if (maxStartIndex === 0) return;
+            currentTestimonialIndex = currentTestimonialIndex >= maxStartIndex ? 0 : currentTestimonialIndex + 1;
+            renderTestimonials();
+        }
+
+        function prevTestimonialPage() {
+            const list = siteData.testimonials || [];
+            const perView = getTestimonialsPerView();
+            const maxStartIndex = Math.max(0, list.length - perView);
+            if (maxStartIndex === 0) return;
+            currentTestimonialIndex = currentTestimonialIndex <= 0 ? maxStartIndex : currentTestimonialIndex - 1;
+            renderTestimonials();
+        }
+
+        function setTestimonialIndex(idx) {
+            currentTestimonialIndex = idx;
+            renderTestimonials();
+        }
+
+        let lastWindowWidth = window.innerWidth;
+        window.addEventListener('resize', () => {
+            if ((lastWindowWidth >= 1024) !== (window.innerWidth >= 1024)) {
+                lastWindowWidth = window.innerWidth;
+                renderGalleryGrid();
+                renderTestimonials();
+            }
+        });
+
+        // ==========================================
+        // DIRECT WHATSAPP REDIRECT
+        // ==========================================
+        function handleWhatsAppRedirect(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('form-name').value.trim();
+            const session = document.getElementById('form-session').value;
+            let output = document.getElementById('form-output').value;
+            const customOutput = document.getElementById('form-custom-output').value.trim();
+            if (output.toLowerCase().includes('custom') && customOutput) {
+                output = `Custom (${customOutput})`;
+            }
+            const budget = document.getElementById('form-budget').value;
+            const date = document.getElementById('form-date').value;
+            const location = document.getElementById('form-location').value.trim() || '-';
+            const msg = document.getElementById('form-msg').value.trim() || '-';
+
+            const waPhone = (siteData.whatsappNumber || '6281234567890').replace(/[^0-9]/g, '');
+
+            const text = `Halo *${siteData.brandName}*, kami ingin memulai diskusi untuk dokumentasi pernikahan kami.\n\n` +
+                         `*Detail Rencana Acara:*\n` +
+                         `• Nama: ${name}\n` +
+                         `• Jenis Sesi Foto: ${session}\n` +
+                         `• Output: ${output}\n` +
+                         `• Range Budget: ${budget}\n` +
+                         `• Rencana Tanggal Acara: ${date}\n` +
+                         `• Lokasi / Venue: ${location}\n` +
+                         `• Konsep / Detail Kebutuhan: ${msg}\n\n` +
+                         `Mohon info ketersediaan tanggal dan detail paketnya ya. Terima kasih!`;
+
+            const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(text)}`;
+
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = `Halo ${name}, mengalihkan detail rencana acara Anda ke WhatsApp ${siteData.brandName}...`;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                window.open(waUrl, '_blank');
+                toast.classList.add('translate-y-20', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 800);
+        }
+
+        // ==========================================
+        // MOBILE MENU & BEFORE/AFTER SLIDER
+        // ==========================================
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        });
+
+        const container = document.getElementById('before-after-container');
+        const beforeWrap = document.getElementById('before-image-wrap');
+        const handle = document.getElementById('slider-handle');
+        let isDragging = false;
+
+        function updateSlider(xPosition) {
+            const rect = container.getBoundingClientRect();
+            let x = Math.max(0, Math.min(xPosition - rect.left, rect.width));
+            const percentage = (x / rect.width) * 100;
+            beforeWrap.style.width = percentage + '%';
+            handle.style.left = percentage + '%';
+        }
+
+        handle.addEventListener('mousedown', () => isDragging = true);
+        window.addEventListener('mouseup', () => isDragging = false);
+        window.addEventListener('mousemove', (e) => { if (isDragging) updateSlider(e.clientX); });
+        handle.addEventListener('touchstart', () => isDragging = true);
+        window.addEventListener('touchend', () => isDragging = false);
+        window.addEventListener('touchmove', (e) => { if (isDragging) updateSlider(e.touches[0].clientX); });
+
+        // Live sync from admin.html
+        window.addEventListener('storage', (e) => {
+            if (e.key === STORAGE_KEY && e.newValue) {
+                siteData = JSON.parse(e.newValue);
+                applySiteData(siteData);
+            }
+        });
+
+        // Sync from Google Apps Script if configured
+        async function syncFromCloud() {
+            if (siteData.gasWebhookUrl && siteData.gasWebhookUrl.startsWith('http')) {
+                try {
+                    const res = await fetch(siteData.gasWebhookUrl);
+                    const cloudData = await res.json();
+                    if (cloudData && cloudData.brandName) {
+                        siteData = cloudData;
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(siteData));
+                        applySiteData(siteData);
+                    }
+                } catch (err) {
+                    console.warn('Cloud sync skipped:', err);
+                }
+            }
+        }
+
+        applySiteData(siteData);
+        initScrollReveal();
+        syncFromCloud();
+    </script>
+</body>
+</html>

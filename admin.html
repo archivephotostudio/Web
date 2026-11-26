@@ -1,0 +1,2042 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin CMS — Archive Photo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            500: '#ffffff',
+                            600: '#e4e4e7',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeSlideUp {
+            0% { opacity: 0; transform: translateY(12px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes modalPop {
+            0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .panel-animate {
+            animation: fadeSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .modal-animate {
+            animation: modalPop 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .sidebar-collapsed .nav-label,
+        .sidebar-collapsed .nav-group-title {
+            display: none;
+        }
+        .sidebar-collapsed .tab-btn {
+            justify-content: center;
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+    </style>
+</head>
+<body class="bg-zinc-100 dark:bg-[#010101] text-zinc-900 dark:text-zinc-100 font-sans antialiased min-h-screen transition-colors duration-300">
+
+    <!-- Login & Account Recovery Gate -->
+    <div id="login-screen" class="fixed inset-0 bg-zinc-100 dark:bg-[#010101] z-50 flex items-center justify-center p-6 transition-colors duration-300">
+        <div class="w-full max-w-sm bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 space-y-6 shadow-2xl panel-animate">
+            <div class="text-center space-y-2">
+                <div class="w-12 h-12 rounded-xl bg-zinc-900/5 dark:bg-white/10 border border-zinc-300 dark:border-white/25 text-zinc-900 dark:text-white flex items-center justify-center mx-auto text-xl">
+                    <i class="fa-solid fa-camera-retro"></i>
+                </div>
+                <h1 class="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">Archive Photo CMS</h1>
+                <p id="portal-subtitle" class="text-xs text-zinc-500">Masukkan 6 digit PIN keamanan untuk masuk ke panel pengelola.</p>
+            </div>
+
+            <!-- View 1: Login Form -->
+            <form id="login-form-view" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <input type="password" id="admin-pin" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" placeholder="••••••" required
+                           class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-center text-lg tracking-[0.5em] text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none transition-colors">
+                </div>
+                <button type="submit" class="w-full py-3 bg-zinc-950 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-950 font-semibold text-xs rounded-xl transition-all duration-300">
+                    Masuk ke Panel
+                </button>
+                <div class="flex items-center justify-between pt-2 border-t border-zinc-200 dark:border-zinc-900 text-xs">
+                    <button type="button" onclick="switchPortalView('forgot')" class="text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                        Lupa PIN?
+                    </button>
+                    <button type="button" onclick="switchPortalView('recovery')" class="text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                        Pemulihan Akun
+                    </button>
+                </div>
+            </form>
+
+            <!-- View 2: Lupa PIN -->
+            <form id="forgot-form-view" onsubmit="handleForgotPin(event)" class="hidden space-y-4">
+                <div class="bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 rounded-xl p-3.5 space-y-1">
+                    <p class="text-[11px] font-medium text-zinc-500">Pertanyaan Keamanan:</p>
+                    <p id="recovery-question-display" class="text-xs font-semibold text-zinc-900 dark:text-white">Apa nama komunitas fotografi yang kamu pimpin?</p>
+                </div>
+                <div>
+                    <label class="text-[11px] font-medium text-zinc-500">Jawaban Keamanan</label>
+                    <input type="text" id="recovery-answer-input" placeholder="Masukkan jawaban..." required
+                           class="w-full mt-1 bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-[11px] font-medium text-zinc-500">Buat PIN Baru (6 Digit Angka)</label>
+                    <input type="password" id="recovery-new-pin" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" placeholder="6 digit angka" required
+                           class="w-full mt-1 bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-center tracking-[0.4em] text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                </div>
+                <button type="submit" class="w-full py-3 bg-zinc-950 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-950 font-semibold text-xs rounded-xl transition-all">
+                    Atur Ulang PIN
+                </button>
+                <button type="button" onclick="switchPortalView('login')" class="w-full text-center text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-white pt-1">
+                    Kembali ke Login
+                </button>
+            </form>
+
+            <!-- View 3: Pemulihan Akun -->
+            <form id="recovery-form-view" onsubmit="handleAccountRecovery(event)" class="hidden space-y-4">
+                <p class="text-xs text-zinc-500 leading-relaxed">
+                    Gunakan <b>Kode Pemulihan Darurat</b> atau email pemulihan terdaftar untuk membuka akses dan mengatur ulang PIN 6 digit.
+                </p>
+                <div>
+                    <label class="text-[11px] font-medium text-zinc-500">Email Pemulihan atau Kode Darurat</label>
+                    <input type="text" id="recovery-code-input" placeholder="Email / Kode Pemulihan" required
+                           class="w-full mt-1 bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-[11px] font-medium text-zinc-500">PIN Baru (6 Digit Angka)</label>
+                    <input type="password" id="account-new-pin" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" placeholder="6 digit angka" required
+                           class="w-full mt-1 bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-center tracking-[0.4em] text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                </div>
+                <button type="submit" class="w-full py-3 bg-zinc-950 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-950 font-semibold text-xs rounded-xl transition-all">
+                    Pulihkan Akun & Simpan PIN
+                </button>
+                <button type="button" onclick="switchPortalView('login')" class="w-full text-center text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-white pt-1">
+                    Kembali ke Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Admin Workspace -->
+    <div id="admin-app" class="hidden">
+        <!-- Top Bar -->
+        <header class="sticky top-0 z-40 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-900 transition-colors duration-300">
+            <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleCompactSidebar()" title="Ringkas / Perluas Menu Samping"
+                            class="w-9 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-300 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center transition-all duration-300">
+                        <i id="compact-icon" class="fa-solid fa-bars-staggered text-xs"></i>
+                    </button>
+                    <span class="w-2.5 h-2.5 rounded-full bg-zinc-900 dark:bg-white"></span>
+                    <span class="font-bold text-sm tracking-tight text-zinc-900 dark:text-white">CMS <span class="text-zinc-500 dark:text-zinc-400 font-medium">Archive Photo</span></span>
+                </div>
+
+                <div class="flex items-center gap-2 sm:gap-2.5">
+                    <!-- Dark / Light Mode Toggle Switch -->
+                    <button onclick="toggleAdminTheme()" title="Ganti Tema Dark / Light Mode"
+                            class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 transition-all duration-300">
+                        <i id="theme-icon" class="fa-solid fa-moon text-zinc-900 dark:text-white"></i>
+                        <span id="theme-label" class="hidden sm:inline">Dark</span>
+                        <span class="w-8 h-4 rounded-full bg-zinc-300 dark:bg-zinc-700 relative inline-flex items-center p-0.5 transition-colors">
+                            <span id="theme-knob" class="w-3 h-3 rounded-full bg-zinc-900 dark:bg-white transform translate-x-4 transition-transform duration-300"></span>
+                        </span>
+                    </button>
+
+                    <a href="index.html" target="_blank" class="px-3.5 py-2 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-300 dark:border-zinc-800 text-zinc-800 dark:text-zinc-300 text-xs font-medium rounded-lg transition-all duration-300 flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> <span class="hidden sm:inline">Lihat Web</span>
+                    </a>
+
+                    <button onclick="saveAllChanges()" class="px-4 py-2 bg-zinc-950 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-950 font-semibold text-xs rounded-lg transition-all duration-300 shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> <span>Simpan</span>
+                    </button>
+
+                    <button onclick="handleLogout()" title="Keluar dari Panel"
+                            class="px-3.5 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-medium rounded-lg transition-all duration-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden md:inline">Logout</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Grid -->
+        <div id="workspace-grid" class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 transition-all duration-300">
+            
+            <!-- Left Classified Navigation Sidebar -->
+            <aside id="admin-sidebar" class="lg:col-span-3 space-y-5 transition-all duration-300">
+                
+                <div class="space-y-1.5">
+                    <p class="nav-group-title px-3 text-[11px] font-semibold text-zinc-400 dark:text-zinc-500">Ringkasan</p>
+                    <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium flex items-center gap-3 transition-all duration-200">
+                        <i class="fa-solid fa-chart-pie w-4 text-center"></i> <span class="nav-label">Dashboard</span>
+                    </button>
+                </div>
+
+                <div class="space-y-1.5">
+                    <p class="nav-group-title px-3 text-[11px] font-semibold text-zinc-400 dark:text-zinc-500">Konten & Portofolio</p>
+                    <button onclick="switchTab('brand')" id="tab-btn-brand" class="tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium flex items-center gap-3 transition-all duration-200">
+                        <i class="fa-solid fa-palette w-4 text-center"></i> <span class="nav-label">Identitas & Tentang</span>
+                    </button>
+                    <button onclick="switchTab('about')" id="tab-btn-about" class="tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium flex items-center gap-3 transition-all duration-200">
+                        <i class="fa-solid fa-feather-pointed w-4 text-center"></i> <span class="nav-label">Filosofi & The Why</span>
+                    </button>
+                    <button onclick="switchTab('gallery')" id="tab-btn-gallery" class="tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium flex items-center gap-3 transition-all duration-200">
+                        <i class="fa-solid fa-images w-4 text-center"></i> <span class="nav-label">Karya</span>
+                    </button>
+                    <button onclick="switchTab('beforeafter')" id="tab-btn-beforeafter" class="tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium flex items-center gap-3 transition-all duration-200">
+                        <i class="fa-solid fa-wand-magic-sparkles w-4 text-center"></i> <span class="nav-label">Before / After</span>
+                    </button>
+                    <button onclick="switchTab('testimonials')" id="tab-btn-testimonials" class="tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium flex items-center gap-3 transition-all duration-200">
+                        <i class="fa-solid fa-quote-left w-4 text-center"></i> <span class="nav-label">Our Client Happy</span>
+                    </button>
+                </div>
+
+                <div class="space-y-1.5">
+                    <p class="nav-group-title px-3 text-[11px] font-semibold text-zinc-400 dark:text-zinc-500">Interaksi & Klien</p>
+                    <button onclick="switchTab('formsettings')" id="tab-btn-formsettings" class="tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium flex items-center gap-3 transition-all duration-200">
+                        <i class="fa-solid fa-list-check w-4 text-center"></i> <span class="nav-label">Pengaturan Form Web</span>
+                    </button>
+                    <button onclick="switchTab('contact')" id="tab-btn-contact" class="tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium flex items-center gap-3 transition-all duration-200">
+                        <i class="fab fa-whatsapp w-4 text-center"></i> <span class="nav-label">Kontak & Floating WA</span>
+                    </button>
+                </div>
+
+                <div class="space-y-1.5">
+                    <p class="nav-group-title px-3 text-[11px] font-semibold text-zinc-400 dark:text-zinc-500">Sistem & Keamanan</p>
+                    <button onclick="switchTab('security')" id="tab-btn-security" class="tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium flex items-center gap-3 transition-all duration-200">
+                        <i class="fa-solid fa-shield-halved w-4 text-center"></i> <span class="nav-label">Keamanan Akun</span>
+                    </button>
+                    <button onclick="switchTab('sync')" id="tab-btn-sync" class="tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium flex items-center gap-3 transition-all duration-200">
+                        <i class="fa-solid fa-cloud-arrow-up w-4 text-center"></i> <span class="nav-label">Backup & Cloud Sync</span>
+                    </button>
+                </div>
+
+            </aside>
+
+            <!-- Right Form Panels -->
+            <main id="admin-main-panel" class="lg:col-span-9 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-2xl p-6 md:p-8 shadow-sm transition-all duration-300">
+
+                <!-- TAB 0: DASHBOARD RINGKASAN -->
+                <div id="panel-dashboard" class="tab-panel panel-animate space-y-6">
+                    <div class="border-b border-zinc-200 dark:border-zinc-900 pb-4 flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-zinc-900 dark:text-white">Dashboard Ringkasan</h2>
+                            <p class="text-xs text-zinc-500 mt-1">Gambaran umum konten portofolio, kategori, dan status koneksi website Archive Photo.</p>
+                        </div>
+                        <button onclick="openAddKaryaModal()" class="px-4 py-2 bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 font-semibold text-xs rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Tambah Karya Cepat
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 p-4 rounded-2xl space-y-1">
+                            <span class="text-xs text-zinc-500">Total Karya</span>
+                            <p id="stat-total-karya" class="text-2xl font-bold text-zinc-900 dark:text-white">0</p>
+                            <span class="text-[11px] text-zinc-400">Foto portofolio</span>
+                        </div>
+                        <div class="bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 p-4 rounded-2xl space-y-1">
+                            <span class="text-xs text-zinc-500">Total Kategori</span>
+                            <p id="stat-total-kategori" class="text-2xl font-bold text-zinc-900 dark:text-white">0</p>
+                            <span class="text-[11px] text-zinc-400">Filter galeri aktif</span>
+                        </div>
+                        <div class="bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 p-4 rounded-2xl space-y-1">
+                            <span class="text-xs text-zinc-500">Testimoni Klien</span>
+                            <p id="stat-total-testimoni" class="text-2xl font-bold text-zinc-900 dark:text-white">0</p>
+                            <span class="text-[11px] text-zinc-400">Our Client Happy</span>
+                        </div>
+                        <div class="bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 p-4 rounded-2xl space-y-1">
+                            <span class="text-xs text-zinc-500">Floating WA</span>
+                            <p id="stat-floating-wa" class="text-2xl font-bold text-zinc-900 dark:text-white">Aktif</p>
+                            <span id="stat-wa-number" class="text-[11px] text-zinc-400 truncate block">-</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 space-y-4">
+                            <h3 class="text-sm font-bold text-zinc-900 dark:text-white">Status Koneksi & Sistem</h3>
+                            <div class="space-y-3 text-xs">
+                                <div class="flex items-center justify-between py-1.5 border-b border-zinc-200 dark:border-zinc-800/70">
+                                    <span class="text-zinc-500">Nama Brand Aktif</span>
+                                    <span id="dash-brand-name" class="font-semibold text-zinc-900 dark:text-white">ARCHIVE PHOTO</span>
+                                </div>
+                                <div class="flex items-center justify-between py-1.5 border-b border-zinc-200 dark:border-zinc-800/70">
+                                    <span class="text-zinc-500">Cloud Sync (Apps Script)</span>
+                                    <span id="dash-cloud-status" class="font-medium text-zinc-700 dark:text-zinc-300">Belum terhubung</span>
+                                </div>
+                                <div class="flex items-center justify-between py-1.5">
+                                    <span class="text-zinc-500">Folder Google Drive</span>
+                                    <span id="dash-drive-status" class="font-medium text-zinc-700 dark:text-zinc-300">Belum diatur</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 space-y-4">
+                            <h3 class="text-sm font-bold text-zinc-900 dark:text-white">Karya Terbaru</h3>
+                            <div id="dash-recent-karya" class="space-y-2.5"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 1: IDENTITAS & TENTANG (HERO) -->
+                <div id="panel-brand" class="tab-panel hidden panel-animate space-y-6">
+                    <div class="border-b border-zinc-200 dark:border-zinc-900 pb-4">
+                        <h2 class="text-lg font-bold text-zinc-900 dark:text-white">Identitas Brand & Halaman Utama (Tentang)</h2>
+                        <p class="text-xs text-zinc-500 mt-1">Atur nama brand, logo monokrom, dan teks pembuka halaman utama.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Nama Brand</label>
+                            <input type="text" id="inp-brandName" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Upload Logo (PNG/SVG) atau Tempel URL</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="inp-logoUrl" placeholder="URL logo atau upload file ->" class="flex-1 bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                                <label class="px-4 py-3 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-xs font-medium rounded-xl cursor-pointer flex items-center text-zinc-800 dark:text-white">
+                                    <i class="fa-solid fa-upload"></i>
+                                    <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'inp-logoUrl', 'preview-logo')">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800/80 p-4 rounded-xl">
+                        <div class="flex items-center gap-4">
+                            <img id="preview-logo" src="" class="h-10 w-auto object-contain bg-zinc-900 p-1.5 rounded border border-zinc-700 hidden">
+                            <div>
+                                <p class="text-xs font-semibold text-zinc-900 dark:text-white">Sembunyikan Teks Nama Brand jika Logo Terpasang</p>
+                                <p class="text-[11px] text-zinc-500">Aktifkan jika gambar logo kamu sudah menyertakan tulisan nama brand.</p>
+                            </div>
+                        </div>
+                        <input type="checkbox" id="inp-hideTextWhenLogoExists" class="w-5 h-5 accent-zinc-900 dark:accent-white rounded">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Tagline Kecil (Atas Judul)</label>
+                        <input type="text" id="inp-heroTagline" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Judul Baris 1</label>
+                            <input type="text" id="inp-heroTitle1" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-300">Judul Sorotan (Italic)</label>
+                            <input type="text" id="inp-heroTitle2" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Judul Akhiran</label>
+                            <input type="text" id="inp-heroTitle3" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Deskripsi Tentang Archive Photo</label>
+                        <textarea id="inp-heroDesc" rows="3" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none"></textarea>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Foto Latar Belakang Hero (URL / Upload)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="inp-heroBg" class="flex-1 bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                            <label class="px-4 py-3 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-xs font-medium rounded-xl cursor-pointer flex items-center text-zinc-800 dark:text-white">
+                                <i class="fa-solid fa-upload"></i>
+                                <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'inp-heroBg')">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: FILOSOFI & THE WHY -->
+                <div id="panel-about" class="tab-panel hidden panel-animate space-y-6">
+                    <div class="border-b border-zinc-200 dark:border-zinc-900 pb-4">
+                        <h2 class="text-lg font-bold text-zinc-900 dark:text-white">Filosofi & The Why</h2>
+                        <p class="text-xs text-zinc-500 mt-1">Atur narasi filosofi pernikahan Archive Photo dan dua pilar utama pelayanan.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Nama Founder</label>
+                            <input type="text" id="inp-aboutName" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Jabatan / Role</label>
+                            <input type="text" id="inp-aboutRole" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Foto Editorial Bagian Filosofi (URL / Upload)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="inp-aboutImg" class="flex-1 bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                            <label class="px-4 py-3 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-xs font-medium rounded-xl cursor-pointer flex items-center text-zinc-800 dark:text-white">
+                                <i class="fa-solid fa-upload"></i>
+                                <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'inp-aboutImg')">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Headline Filosofi</label>
+                        <input type="text" id="inp-aboutHeadline" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Narasi Filosofi / The Why</label>
+                        <textarea id="inp-aboutBio" rows="5" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                        <div class="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-4 rounded-xl space-y-3">
+                            <span class="text-xs font-semibold text-zinc-900 dark:text-white">Pilar 1</span>
+                            <input type="text" id="inp-pillar1Title" placeholder="Judul Pilar 1" class="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-white">
+                            <textarea id="inp-pillar1Desc" rows="2" placeholder="Deskripsi Pilar 1" class="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-700 dark:text-zinc-300"></textarea>
+                        </div>
+                        <div class="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-4 rounded-xl space-y-3">
+                            <span class="text-xs font-semibold text-zinc-900 dark:text-white">Pilar 2</span>
+                            <input type="text" id="inp-pillar2Title" placeholder="Judul Pilar 2" class="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-white">
+                            <textarea id="inp-pillar2Desc" rows="2" placeholder="Deskripsi Pilar 2" class="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-700 dark:text-zinc-300"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: KARYA (MULTI-UPLOAD POPUP, REORDER, PENOMORAN, KATEGORI) -->
+                <div id="panel-gallery" class="tab-panel hidden panel-animate space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-900 pb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-zinc-900 dark:text-white">Manajemen Karya</h2>
+                            <p class="text-xs text-zinc-500 mt-1">Upload banyak foto sekaligus, atur urutan tampil dengan tombol atas/bawah, atau kelola kategori.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="openCategoryModal('add')" class="px-3.5 py-2 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-300 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 font-medium text-xs rounded-xl transition-all flex items-center gap-1.5">
+                                <i class="fa-solid fa-folder-plus"></i> Tambahkan Kategori
+                            </button>
+                            <button onclick="openCategoryModal('manage')" class="px-3.5 py-2 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-300 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 font-medium text-xs rounded-xl transition-all flex items-center gap-1.5">
+                                <i class="fa-solid fa-tags"></i> Kelola Kategori
+                            </button>
+                            <button onclick="openAddKaryaModal()" class="px-4 py-2 bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 font-semibold text-xs rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-sm flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> Tambah Karya
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="admin-karya-filter-bar" class="flex flex-wrap items-center gap-2"></div>
+                    <div id="gallery-editor-list" class="space-y-3"></div>
+                </div>
+
+                <!-- TAB 4: BEFORE / AFTER -->
+                <div id="panel-beforeafter" class="tab-panel hidden panel-animate space-y-6">
+                    <div class="border-b border-zinc-200 dark:border-zinc-900 pb-4">
+                        <h2 class="text-lg font-bold text-zinc-900 dark:text-white">Slider Before & After</h2>
+                        <p class="text-xs text-zinc-500 mt-1">Atur foto perbandingan RAW vs hasil color grading akhir.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Foto Before (RAW Asli)</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="inp-baBeforeImg" class="flex-1 bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white">
+                                <label class="px-4 py-3 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-xs font-medium rounded-xl cursor-pointer flex items-center text-zinc-800 dark:text-white">
+                                    <i class="fa-solid fa-upload"></i>
+                                    <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'inp-baBeforeImg')">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Foto After (Hasil Grading)</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="inp-baAfterImg" class="flex-1 bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white">
+                                <label class="px-4 py-3 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-xs font-medium rounded-xl cursor-pointer flex items-center text-zinc-800 dark:text-white">
+                                    <i class="fa-solid fa-upload"></i>
+                                    <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'inp-baAfterImg')">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-4 rounded-xl">
+                            <div>
+                                <p class="text-xs font-semibold text-zinc-900 dark:text-white">Simulasi Efek RAW Otomatis pada Foto Before</p>
+                                <p class="text-[11px] text-zinc-500">Matikan centang ini jika kamu mengupload dua file foto yang memang berbeda (mentah vs matang).</p>
+                            </div>
+                            <input type="checkbox" id="inp-baUseFilterOnBefore" class="w-5 h-5 accent-zinc-900 dark:accent-white">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: OUR CLIENT HAPPY (TESTIMONI DENGAN POPUP MODERN) -->
+                <div id="panel-testimonials" class="tab-panel hidden panel-animate space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-900 pb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-zinc-900 dark:text-white">Our Client Happy (Testimoni)</h2>
+                            <p class="text-xs text-zinc-500 mt-1">Kelola ulasan pasangan pengantin melalui popup modern. Tampil 3 kartu di laptop dan 2 kartu di HP.</p>
+                        </div>
+                        <button onclick="openAddTestiModal()" class="px-4 py-2 bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 font-semibold text-xs rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-sm flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Tambah Testimoni
+                        </button>
+                    </div>
+                    <div id="testimonials-editor-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+
+                <!-- TAB 6: PENGATURAN FORM WEB -->
+                <div id="panel-formsettings" class="tab-panel hidden panel-animate space-y-6">
+                    <div class="border-b border-zinc-200 dark:border-zinc-900 pb-4">
+                        <h2 class="text-lg font-bold text-zinc-900 dark:text-white">Pengaturan Form Diskusi Web</h2>
+                        <p class="text-xs text-zinc-500 mt-1">Kustomisasi judul form, teks tombol kirim, serta daftar pilihan dropdown di formulir calon pengantin.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Judul Bagian Form</label>
+                            <input type="text" id="inp-formSectionTitle" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Teks Tombol Submit Form</label>
+                            <input type="text" id="inp-formSubmitText" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Deskripsi Ajakan Form</label>
+                        <textarea id="inp-formSectionSubtitle" rows="2" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-700 dark:text-zinc-300">Opsi Jenis Sesi Foto (1 Baris = 1 Opsi)</label>
+                            <textarea id="inp-sessionOptions" rows="5" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-zinc-900 dark:text-white font-mono"></textarea>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-700 dark:text-zinc-300">Opsi Output (1 Baris = 1 Opsi)</label>
+                            <textarea id="inp-outputOptions" rows="5" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-zinc-900 dark:text-white font-mono"></textarea>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-700 dark:text-zinc-300">Opsi Range Budget (1 Baris = 1 Opsi)</label>
+                            <textarea id="inp-budgetOptions" rows="5" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-zinc-900 dark:text-white font-mono"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 7: KONTAK & FLOATING WA -->
+                <div id="panel-contact" class="tab-panel hidden panel-animate space-y-6">
+                    <div class="border-b border-zinc-200 dark:border-zinc-900 pb-4">
+                        <h2 class="text-lg font-bold text-zinc-900 dark:text-white">Kontak & Pengaturan Floating Button WA</h2>
+                        <p class="text-xs text-zinc-500 mt-1">Atur nomor WhatsApp tujuan serta aktif/nonaktifkan tombol melayang (floating) di pojok kanan bawah.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-900 dark:text-white">Nomor WhatsApp Tujuan (Awali 62)</label>
+                            <input type="text" id="inp-whatsappNumber" placeholder="6281234567890" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Format Tampilan Nomor WA</label>
+                            <input type="text" id="inp-whatsappDisplay" placeholder="+62 812-3456-7890" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white">
+                        </div>
+                    </div>
+
+                    <div class="bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2"><i class="fab fa-whatsapp"></i> Floating Button WhatsApp</h4>
+                                <p class="text-xs text-zinc-500 mt-0.5">Tampilkan tombol chat cepat melayang di pojok kanan bawah layar pengunjung.</p>
+                            </div>
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="inp-floatingWaEnabled" class="sr-only peer">
+                                <div class="w-11 h-6 bg-zinc-300 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-zinc-950 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-zinc-400 peer-checked:after:bg-white dark:peer-checked:after:bg-zinc-950 after:rounded-full after:h-5 after:w-5 after:transition-all relative peer-checked:bg-zinc-900 dark:peer-checked:bg-white"></div>
+                            </label>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-zinc-200 dark:border-zinc-800/80">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Teks Tombol Floating WA</label>
+                                <input type="text" id="inp-floatingWaText" placeholder="Contoh: Diskusi via WA" class="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-900 dark:text-white">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Pesan Pembuka Otomatis Saat Klik Floating WA</label>
+                                <input type="text" id="inp-floatingWaPrefill" placeholder="Halo Archive Photo, saya ingin tanya..." class="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-900 dark:text-white">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Email Korespondensi</label>
+                            <input type="email" id="inp-email" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Link Profil Instagram</label>
+                            <input type="text" id="inp-instagramUrl" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Alamat / Basis Operasional</label>
+                        <input type="text" id="inp-address" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white">
+                    </div>
+                </div>
+
+                <!-- TAB 8: KEAMANAN AKUN (PIN 6 DIGIT & PEMULIHAN) -->
+                <div id="panel-security" class="tab-panel hidden panel-animate space-y-6">
+                    <div class="border-b border-zinc-200 dark:border-zinc-900 pb-4">
+                        <h2 class="text-lg font-bold text-zinc-900 dark:text-white">Keamanan Akun & Pemulihan</h2>
+                        <p class="text-xs text-zinc-500 mt-1">Atur PIN 6 digit angka, pertanyaan keamanan untuk Lupa PIN, dan kode pemulihan akun darurat.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 space-y-4">
+                            <h3 class="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                                <i class="fa-solid fa-key"></i> Ubah PIN Login (6 Digit)
+                            </h3>
+                            <div class="space-y-2">
+                                <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">PIN Saat Ini</label>
+                                <input type="password" id="sec-old-pin" maxlength="6" inputmode="numeric" placeholder="••••••" class="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-sm tracking-[0.4em] text-zinc-900 dark:text-white">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">PIN Baru (6 Digit Angka)</label>
+                                <input type="password" id="sec-new-pin" maxlength="6" inputmode="numeric" placeholder="••••••" class="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-sm tracking-[0.4em] text-zinc-900 dark:text-white">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Konfirmasi PIN Baru</label>
+                                <input type="password" id="sec-confirm-pin" maxlength="6" inputmode="numeric" placeholder="••••••" class="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-sm tracking-[0.4em] text-zinc-900 dark:text-white">
+                            </div>
+                            <button type="button" onclick="updateSecurityPin()" class="w-full py-2.5 bg-zinc-950 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-950 font-semibold text-xs rounded-xl transition-all">
+                                Perbarui PIN 6 Digit
+                            </button>
+                        </div>
+
+                        <div class="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 space-y-4">
+                            <h3 class="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                                <i class="fa-solid fa-life-ring"></i> Pengaturan Pemulihan Akun
+                            </h3>
+                            <div class="space-y-2">
+                                <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Pertanyaan Keamanan (Untuk Lupa PIN)</label>
+                                <input type="text" id="sec-question" class="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-900 dark:text-white">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Jawaban Keamanan</label>
+                                <input type="text" id="sec-answer" class="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-900 dark:text-white">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Email Pemulihan Terdaftar</label>
+                                <input type="email" id="sec-recovery-email" class="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-900 dark:text-white">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Kode Pemulihan Darurat</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="sec-recovery-code" readonly class="flex-1 bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs font-mono text-zinc-900 dark:text-white">
+                                    <button type="button" onclick="regenerateRecoveryCode()" class="px-3 py-2 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 rounded-xl text-xs font-medium text-zinc-800 dark:text-white">
+                                        Acak Baru
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" onclick="saveRecoverySettings()" class="w-full py-2.5 bg-zinc-950 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-950 font-semibold text-xs rounded-xl transition-all">
+                                Simpan Info Pemulihan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 9: BACKUP & CLOUD SYNC -->
+                <div id="panel-sync" class="tab-panel hidden panel-animate space-y-6">
+                    <div class="border-b border-zinc-200 dark:border-zinc-900 pb-4 flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-zinc-900 dark:text-white">Backup JSON & Cloud Sync</h2>
+                            <p class="text-xs text-zinc-500 mt-1">Sinkronkan data langsung dengan Google Apps Script dan Folder Google Drive.</p>
+                        </div>
+                        <button type="button" onclick="syncNow()" id="btn-sync-now"
+                                class="px-4 py-2.5 bg-zinc-950 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-950 font-semibold text-xs rounded-xl transition-all shadow-sm flex items-center gap-2">
+                            <i id="sync-now-icon" class="fa-solid fa-rotate"></i> <span>Sync Sekarang</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-900 dark:text-white">Google Apps Script Web App URL</label>
+                            <input type="text" id="inp-gasWebhookUrl" placeholder="https://script.google.com/macros/s/xxxxx/exec" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                            <p class="text-[11px] text-zinc-500">Endpoint GAS untuk menyimpan JSON konfigurasi & upload gambar otomatis.</p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-zinc-900 dark:text-white">ID Folder Google Drive (Penyimpanan Karya)</label>
+                            <input type="text" id="inp-driveFolderId" placeholder="Contoh: 1A2b3C4d5E6f7G8h9I0jKlMnOpQrStUvW" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white font-mono focus:border-zinc-900 dark:focus:border-white focus:outline-none">
+                            <p class="text-[11px] text-zinc-500">Salin ID folder dari URL Google Drive (<code class="text-zinc-700 dark:text-zinc-300">drive.google.com/drive/folders/<b>[ID_FOLDER]</b></code>).</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                                <h4 class="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-plug-circle-check"></i> Uji Koneksi URL, API & Folder Drive
+                                </h4>
+                                <p class="text-xs text-zinc-500 mt-0.5">Periksa apakah endpoint Google Apps Script merespons dengan baik dan siap menerima sinkronisasi.</p>
+                            </div>
+                            <button type="button" onclick="testCloudConnection()" id="btn-test-conn"
+                                    class="px-4 py-2.5 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white font-semibold text-xs rounded-xl transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-bolt"></i> Tes Koneksi Sekarang
+                            </button>
+                        </div>
+
+                        <div id="conn-test-result" class="hidden rounded-xl border p-4 text-xs space-y-2 font-mono"></div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-900">
+                        <button onclick="exportConfigJSON()" class="px-4 py-2.5 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-300 dark:border-zinc-800 rounded-xl text-xs font-medium text-zinc-900 dark:text-white">
+                            <i class="fa-solid fa-download mr-2"></i> Export Backup (.json)
+                        </button>
+                        <label class="px-4 py-2.5 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-300 dark:border-zinc-800 rounded-xl text-xs font-medium text-zinc-900 dark:text-white cursor-pointer">
+                            <i class="fa-solid fa-upload mr-2"></i> Import Backup (.json)
+                            <input type="file" accept=".json" class="hidden" onchange="importConfigJSON(event)">
+                        </label>
+                        <button onclick="resetToDefault()" class="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-xl text-xs font-medium text-red-600 dark:text-red-400">
+                            <i class="fa-solid fa-rotate-left mr-2"></i> Reset Default
+                        </button>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- POPUP MODAL: TAMBAH (MULTI-UPLOAD) / EDIT KARYA MODERN       -->
+    <!-- ============================================================ -->
+    <div id="karya-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl w-full max-w-2xl p-6 md:p-7 shadow-2xl modal-animate space-y-5 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-900 pb-3.5">
+                <div>
+                    <h3 id="karya-modal-title" class="text-base font-bold text-zinc-900 dark:text-white">Tambah Karya (Bisa Banyak Foto Sekaligus)</h3>
+                    <p id="karya-modal-subtitle" class="text-[11px] text-zinc-500 mt-0.5">Pilih beberapa foto sekaligus—setiap file akan otomatis dikompresi agar upload cepat.</p>
+                </div>
+                <button onclick="closeKaryaModal()" class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-zinc-900 dark:hover:text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="saveKaryaFromModal(event)" class="space-y-4">
+                <input type="hidden" id="modal-karya-index" value="-1">
+
+                <!-- Mode Tambah Banyak Foto Sekaligus (Batch Upload) -->
+                <div id="batch-upload-section" class="space-y-3">
+                    <label class="w-full py-6 px-4 bg-zinc-50 dark:bg-zinc-900/70 hover:bg-zinc-100 dark:hover:bg-zinc-900 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-2xl cursor-pointer flex flex-col items-center justify-center gap-2 text-center transition-colors">
+                        <div class="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-white flex items-center justify-center">
+                            <i class="fa-solid fa-images text-base"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-zinc-900 dark:text-white">Klik untuk Memilih Banyak Foto Sekaligus</span>
+                        <span class="text-[11px] text-zinc-500">Mendukung JPG, PNG, WebP · Otomatis terkompresi sebelum diunggah</span>
+                        <input type="file" id="modal-karya-multi-files" accept="image/*" multiple class="hidden" onchange="handleBatchKaryaFiles(event)">
+                    </label>
+
+                    <!-- Batch Upload Queue & Progress -->
+                    <div id="batch-preview-wrap" class="hidden space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span id="batch-status-text" class="font-medium text-zinc-700 dark:text-zinc-300">0 foto siap disimpan</span>
+                            <button type="button" onclick="clearBatchQueue()" class="text-red-500 hover:underline text-[11px]">Hapus Semua</button>
+                        </div>
+                        <div id="batch-preview-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-48 overflow-y-auto p-1"></div>
+                    </div>
+
+                    <!-- Opsi Input URL Manual jika tidak pakai file -->
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-medium text-zinc-500">Atau Tempel URL Foto Manual (Opsional, 1 Baris = 1 URL)</label>
+                        <textarea id="modal-karya-urls" rows="2" placeholder="https://..." class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-zinc-900 dark:text-white font-mono"></textarea>
+                    </div>
+                </div>
+
+                <!-- Mode Edit Single Karya -->
+                <div id="single-edit-section" class="hidden grid grid-cols-12 gap-4 items-center">
+                    <div class="col-span-4">
+                        <img id="modal-karya-preview" src="" class="w-full aspect-[3/4] object-cover rounded-xl border border-zinc-300 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900">
+                    </div>
+                    <div class="col-span-8 space-y-3">
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Ganti File Foto</label>
+                            <label class="w-full py-2.5 px-3 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-dashed border-zinc-400 dark:border-zinc-700 rounded-xl text-xs font-medium text-zinc-800 dark:text-zinc-200 cursor-pointer flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Pilih Foto Pengganti
+                                <input type="file" accept="image/*" class="hidden" onchange="handleSingleEditKaryaFile(event)">
+                            </label>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">URL Foto</label>
+                            <input type="text" id="modal-karya-src" oninput="document.getElementById('modal-karya-preview').src = this.value" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-900 dark:text-white">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metadata Bersama (Nama Pasangan, Kategori, Lokasi, Tahun) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Nama Pasangan / Karya</label>
+                        <input type="text" id="modal-karya-title" required placeholder="Contoh: Raka & Nadya" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 dark:text-white">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Kategori</label>
+                        <select id="modal-karya-category" required class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 dark:text-white"></select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Lokasi Acara</label>
+                        <input type="text" id="modal-karya-location" required placeholder="Contoh: Jakarta Selatan" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 dark:text-white">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Tahun</label>
+                        <input type="text" id="modal-karya-year" required placeholder="Contoh: 2026" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 dark:text-white">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2.5 pt-3 border-t border-zinc-200 dark:border-zinc-900">
+                    <button type="button" onclick="closeKaryaModal()" class="px-4 py-2.5 bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-xs font-medium rounded-xl">
+                        Batal
+                    </button>
+                    <button type="submit" id="btn-save-karya-modal" class="px-5 py-2.5 bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 text-xs font-semibold rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all">
+                        Simpan Karya
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- POPUP MODAL: TAMBAH & EDIT TESTIMONI (OUR CLIENT HAPPY)      -->
+    <!-- ============================================================ -->
+    <div id="testi-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl w-full max-w-lg p-6 md:p-7 shadow-2xl modal-animate space-y-5">
+            <div class="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-900 pb-3.5">
+                <div>
+                    <h3 id="testi-modal-title" class="text-base font-bold text-zinc-900 dark:text-white">Tambah Testimoni Klien</h3>
+                    <p class="text-[11px] text-zinc-500 mt-0.5">Ulasan pasangan pengantin yang akan tampil di bagian Our Client Happy.</p>
+                </div>
+                <button onclick="closeTestiModal()" class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-zinc-900 dark:hover:text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="saveTestiFromModal(event)" class="space-y-4">
+                <input type="hidden" id="modal-testi-index" value="-1">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Nama Pasangan</label>
+                        <input type="text" id="modal-testi-author" required placeholder="Contoh: Raka & Nadya" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 dark:text-white">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Acara & Lokasi</label>
+                        <input type="text" id="modal-testi-event" required placeholder="Contoh: Akad & Resepsi · Jakarta" class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 dark:text-white">
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Isi Ulasan / Kesan Pengantin</label>
+                    <textarea id="modal-testi-quote" rows="4" required placeholder="Tuliskan cerita atau kesan positif dari pasangan pengantin..." class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 dark:text-white leading-relaxed"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2.5 pt-3 border-t border-zinc-200 dark:border-zinc-900">
+                    <button type="button" onclick="closeTestiModal()" class="px-4 py-2.5 bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-xs font-medium rounded-xl">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 text-xs font-semibold rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all">
+                        Simpan Testimoni
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- POPUP MODAL: TAMBAH & KELOLA KATEGORI                        -->
+    <!-- ============================================================ -->
+    <div id="category-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl w-full max-w-md p-6 shadow-2xl modal-animate space-y-5">
+            <div class="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-900 pb-3.5">
+                <h3 class="text-base font-bold text-zinc-900 dark:text-white">Kategori Karya</h3>
+                <button onclick="closeCategoryModal()" class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-zinc-900 dark:hover:text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="addNewCategory(event)" class="flex gap-2">
+                <input type="text" id="new-category-input" placeholder="Nama kategori baru (misal: Prewedding)" required
+                       class="flex-1 bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 dark:text-white focus:outline-none">
+                <button type="submit" class="px-4 py-2.5 bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 font-semibold text-xs rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all">
+                    Tambah
+                </button>
+            </form>
+
+            <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                <p class="text-[11px] font-medium text-zinc-500">Daftar Kategori Saat Ini:</p>
+                <div id="category-list-container" class="space-y-2"></div>
+            </div>
+
+            <div class="flex justify-end pt-2 border-t border-zinc-200 dark:border-zinc-900">
+                <button type="button" onclick="closeCategoryModal()" class="px-4 py-2 bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-xs font-medium rounded-xl">
+                    Selesai
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Toast -->
+    <div id="admin-toast" class="fixed bottom-5 right-5 z-50 bg-zinc-950 dark:bg-zinc-900 border border-zinc-700 dark:border-white text-white px-5 py-3.5 rounded-xl shadow-2xl text-xs font-medium transform translate-y-20 opacity-0 transition-all duration-300">
+        Perubahan berhasil disimpan!
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'archive_photo_cms_v1';
+        const SECURITY_KEY = 'archive_photo_admin_sec_v1';
+        const SESSION_KEY = 'archive_photo_admin_logged_in';
+        const THEME_KEY = 'archive_photo_admin_theme';
+
+        let activeTabName = 'dashboard';
+        let adminGalleryFilter = 'ALL';
+        let batchUploadedUrls = [];
+
+        // ==========================================
+        // SECURITY & 6-DIGIT PIN MANAGEMENT
+        // ==========================================
+        const DEFAULT_SECURITY = {
+            pin: '240699',
+            question: 'Apa nama komunitas fotografi yang kamu pimpin?',
+            answer: 'satu jepret',
+            recoveryEmail: 'hello@archivephoto.id',
+            recoveryCode: 'ARC-2406-SAFE'
+        };
+
+        let secData = JSON.parse(localStorage.getItem(SECURITY_KEY)) || JSON.parse(JSON.stringify(DEFAULT_SECURITY));
+
+        function saveSecurityStore() {
+            localStorage.setItem(SECURITY_KEY, JSON.stringify(secData));
+        }
+
+        function switchPortalView(view) {
+            document.getElementById('login-form-view').classList.add('hidden');
+            document.getElementById('forgot-form-view').classList.add('hidden');
+            document.getElementById('recovery-form-view').classList.add('hidden');
+
+            const sub = document.getElementById('portal-subtitle');
+            if (view === 'login') {
+                document.getElementById('login-form-view').classList.remove('hidden');
+                sub.textContent = 'Masukkan 6 digit PIN keamanan untuk masuk ke panel pengelola.';
+            } else if (view === 'forgot') {
+                document.getElementById('recovery-question-display').textContent = secData.question;
+                document.getElementById('forgot-form-view').classList.remove('hidden');
+                sub.textContent = 'Jawab pertanyaan keamanan untuk mengatur ulang PIN 6 digit.';
+            } else if (view === 'recovery') {
+                document.getElementById('recovery-form-view').classList.remove('hidden');
+                sub.textContent = 'Pulihkan akses akun menggunakan email atau kode darurat.';
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const pin = document.getElementById('admin-pin').value.trim();
+            if (pin === secData.pin) {
+                sessionStorage.setItem(SESSION_KEY, 'true');
+                enterAdminWorkspace();
+            } else {
+                showAdminToast('PIN 6 digit salah. Silakan coba lagi.');
+            }
+        }
+
+        function handleForgotPin(e) {
+            e.preventDefault();
+            const ans = document.getElementById('recovery-answer-input').value.trim().toLowerCase();
+            const newPin = document.getElementById('recovery-new-pin').value.trim();
+            if (!/^\d{6}$/.test(newPin)) {
+                showAdminToast('PIN baru harus terdiri dari 6 digit angka.');
+                return;
+            }
+            if (ans === secData.answer.trim().toLowerCase()) {
+                secData.pin = newPin;
+                saveSecurityStore();
+                showAdminToast('PIN 6 digit berhasil diperbarui! Silakan masuk.');
+                switchPortalView('login');
+            } else {
+                showAdminToast('Jawaban keamanan tidak sesuai.');
+            }
+        }
+
+        function handleAccountRecovery(e) {
+            e.preventDefault();
+            const inputVal = document.getElementById('recovery-code-input').value.trim().toLowerCase();
+            const newPin = document.getElementById('account-new-pin').value.trim();
+            if (!/^\d{6}$/.test(newPin)) {
+                showAdminToast('PIN baru harus terdiri dari 6 digit angka.');
+                return;
+            }
+            if (inputVal === secData.recoveryEmail.trim().toLowerCase() || inputVal === secData.recoveryCode.trim().toLowerCase()) {
+                secData.pin = newPin;
+                saveSecurityStore();
+                showAdminToast('Akun berhasil dipulihkan! Silakan login dengan PIN baru.');
+                switchPortalView('login');
+            } else {
+                showAdminToast('Email pemulihan atau kode darurat tidak cocok.');
+            }
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem(SESSION_KEY);
+            document.getElementById('admin-pin').value = '';
+            document.getElementById('admin-app').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            switchPortalView('login');
+            showAdminToast('Berhasil keluar dari panel admin.');
+        }
+
+        function enterAdminWorkspace() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('admin-app').classList.remove('hidden');
+            applyAdminTheme(localStorage.getItem(THEME_KEY) || 'dark');
+            populateForm();
+            renderDashboard();
+        }
+
+        // ==========================================
+        // DARK / LIGHT MODE & COMPACT SIDEBAR TOGGLE
+        // ==========================================
+        function applyAdminTheme(theme) {
+            const htmlEl = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            const label = document.getElementById('theme-label');
+            const knob = document.getElementById('theme-knob');
+
+            if (theme === 'light') {
+                htmlEl.classList.remove('dark');
+                if (icon) icon.className = 'fa-solid fa-sun text-amber-500';
+                if (label) label.textContent = 'Light';
+                if (knob) knob.classList.remove('translate-x-4');
+            } else {
+                htmlEl.classList.add('dark');
+                if (icon) icon.className = 'fa-solid fa-moon text-white';
+                if (label) label.textContent = 'Dark';
+                if (knob) knob.classList.add('translate-x-4');
+            }
+            localStorage.setItem(THEME_KEY, theme);
+            updateTabStyles();
+        }
+
+        function toggleAdminTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            applyAdminTheme(isDark ? 'light' : 'dark');
+        }
+
+        let isSidebarCompact = false;
+        function toggleCompactSidebar() {
+            isSidebarCompact = !isSidebarCompact;
+            const sidebar = document.getElementById('admin-sidebar');
+            const mainPanel = document.getElementById('admin-main-panel');
+            if (isSidebarCompact) {
+                sidebar.classList.add('sidebar-collapsed', 'lg:col-span-1');
+                sidebar.classList.remove('lg:col-span-3');
+                mainPanel.classList.add('lg:col-span-11');
+                mainPanel.classList.remove('lg:col-span-9');
+            } else {
+                sidebar.classList.remove('sidebar-collapsed', 'lg:col-span-1');
+                sidebar.classList.add('lg:col-span-3');
+                mainPanel.classList.remove('lg:col-span-11');
+                mainPanel.classList.add('lg:col-span-9');
+            }
+        }
+
+        applyAdminTheme(localStorage.getItem(THEME_KEY) || 'dark');
+
+        // ==========================================
+        // DEFAULT SITE DATA (Synced with index.html)
+        // ==========================================
+        const DEFAULT_DATA = {
+            brandName: "ARCHIVE PHOTO",
+            logoUrl: "",
+            hideTextWhenLogoExists: false,
+            heroTagline: "WEDDING DOCUMENTATION ARCHIVE",
+            heroTitle1: "Merawat Setiap",
+            heroTitle2: "Rasa Bahagia",
+            heroTitle3: "Anda.",
+            heroDesc: "Archive Photo adalah vendor dokumentasi khusus pernikahan yang berfokus merekam kehangatan, air mata haru, dan tawa tulus di hari sakral Anda agar tetap utuh untuk diceritakan kembali lintas generasi.",
+            heroBg: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1920&q=80",
+            aboutImg: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
+            aboutHeadline: 'Karena Hari Pernikahan Berlalu Begitu Cepat, Namun <span class="italic text-zinc-300 font-normal">Rasa</span> Harus Tetap Tinggal.',
+            aboutBio: 'Bagi <strong class="text-white font-medium">Archive Photo</strong>, pernikahan bukan sekadar susunan acara formal atau deretan pose di pelaminan. Ia adalah titik temu paling jujur antara doa orang tua, genggaman tangan pasangan, dan senyum orang-orang terdekat yang hadir merayakan cinta Anda. Kami hadir bukan untuk mengatur ulang hari Anda, melainkan menjaga agar setiap detik kehangatan itu tersimpan utuh—sehingga bertahun-tahun kemudian, saat Anda membuka kembali arsip ini, perasaan hangat hari itu kembali hadir seutuhnya.',
+            pillar1Title: "Kejujuran Emosi & Candid",
+            pillar1Desc: "Menangkap tawa lepas, pelukan hangat, dan momen intim yang terjadi secara alami tanpa paksaan pose.",
+            pillar2Title: "Arsip Visual Tak Lekang Waktu",
+            pillar2Desc: "Komposisi bersih dan pewarnaan klasik yang tetap terasa elegan dan relevan hingga puluhan tahun mendatang.",
+            aboutName: "Surohman",
+            aboutRole: "Founder & Lead Wedding Storyteller",
+            baBeforeImg: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+            baAfterImg: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+            baUseFilterOnBefore: true,
+            whatsappNumber: "6281234567890",
+            whatsappDisplay: "+62 812-3456-7890",
+            floatingWaEnabled: true,
+            floatingWaText: "Diskusi via WA",
+            floatingWaPrefill: "Halo Archive Photo, saya ingin berdiskusi mengenai dokumentasi pernikahan kami.",
+            email: "hello@archivephoto.id",
+            address: "Jakarta Timur, DKI Jakarta (Melayani Jabodetabek & Destination Wedding)",
+            instagramUrl: "https://instagram.com/",
+            formSectionTitle: "Mulai Diskusi",
+            formSectionSubtitle: "Ceritakan rencana hari pernikahan Anda melalui formulir di samping. Detail yang Anda isi akan langsung terhubung ke WhatsApp tim Archive Photo untuk pengecekan tanggal dan pengiriman pricelist lengkap.",
+            formSubmitText: "Mulai Diskusi via WhatsApp",
+            sessionOptions: [
+                "Akad Saja",
+                "Resepsi Saja",
+                "Akad & Resepsi"
+            ],
+            outputOptions: [
+                "Foto Saja",
+                "Foto & Album",
+                "Foto & Video",
+                "Lengkap (Foto, Video, & Album)",
+                "Custom"
+            ],
+            budgetOptions: [
+                "Di bawah Rp 5 Juta",
+                "Rp 5 Juta – Rp 8 Juta",
+                "Rp 8 Juta – Rp 12 Juta",
+                "Di atas Rp 12 Juta",
+                "Diskusikan Sesuai Kebutuhan"
+            ],
+            galleryCategories: [
+                "AKAD & RESEPSI",
+                "INTIMATE WEDDING",
+                "AKAD NIKAH",
+                "RESEPSI"
+            ],
+            gallery: [
+                {
+                    src: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+                    title: "Raka & Nadya",
+                    category: "AKAD & RESEPSI",
+                    location: "Jakarta Selatan",
+                    year: "2026"
+                },
+                {
+                    src: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
+                    title: "Dimas & Laras",
+                    category: "INTIMATE WEDDING",
+                    location: "Bogor",
+                    year: "2026"
+                },
+                {
+                    src: "https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&w=1200&q=80",
+                    title: "Fajar & Aulia",
+                    category: "AKAD NIKAH",
+                    location: "Jakarta Timur",
+                    year: "2025"
+                }
+            ],
+            testimonials: [
+                {
+                    quote: "Tim Archive Photo benar-benar bikin kami nyaman sepanjang acara. Nggak terasa diarahkan kaku, tapi semua momen haru pas sungkeman dan tawa keluarga ketangkap dengan sangat hangat.",
+                    author: "Raka & Nadya",
+                    event: "Akad & Resepsi · Jakarta"
+                },
+                {
+                    quote: "Hasil foto dan albumnya clean banget, timeless! Pas dilihat bareng orang tua setelah acara, rasanya seperti mengulang kembali kebahagiaan hari itu.",
+                    author: "Dimas & Laras",
+                    event: "Intimate Wedding · Bogor"
+                },
+                {
+                    quote: "Komunikasinya enak dari awal diskusi sampai file selesai dikirim. Tepat waktu dan detail-detail kecil yang sempat terlewat oleh kami justru berhasil diabadikan dengan manis.",
+                    author: "Fajar & Aulia",
+                    event: "Akad Nikah · Jakarta Timur"
+                }
+            ],
+            gasWebhookUrl: "",
+            driveFolderId: ""
+        };
+
+        let cmsData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || JSON.parse(JSON.stringify(DEFAULT_DATA));
+
+        function getAllCategories() {
+            const fromList = cmsData.galleryCategories || [];
+            const fromItems = (cmsData.gallery || []).map(g => (g.category || '').toUpperCase()).filter(Boolean);
+            return [...new Set([...fromList.map(c => c.toUpperCase()), ...fromItems])];
+        }
+
+        function updateTabStyles() {
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                const compactCls = isSidebarCompact ? 'justify-center px-3' : 'px-4';
+                if (b.id === `tab-btn-${activeTabName}`) {
+                    b.className = `tab-btn w-full text-left ${compactCls} py-2.5 rounded-xl text-xs font-semibold bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 flex items-center gap-3 shadow-sm transition-all duration-200`;
+                } else {
+                    b.className = `tab-btn w-full text-left ${compactCls} py-2.5 rounded-xl text-xs font-medium bg-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/60 dark:hover:bg-zinc-900 hover:text-zinc-950 dark:hover:text-white flex items-center gap-3 transition-all duration-200`;
+                }
+            });
+        }
+
+        function switchTab(tabName) {
+            activeTabName = tabName;
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+            const panel = document.getElementById(`panel-${tabName}`);
+            panel.classList.remove('hidden');
+            panel.classList.remove('panel-animate');
+            void panel.offsetWidth;
+            panel.classList.add('panel-animate');
+
+            updateTabStyles();
+            if (tabName === 'dashboard') renderDashboard();
+        }
+
+        // ==========================================
+        // DASHBOARD RENDERER
+        // ==========================================
+        function renderDashboard() {
+            const karyaList = cmsData.gallery || [];
+            const cats = getAllCategories();
+            const testiList = cmsData.testimonials || [];
+
+            document.getElementById('stat-total-karya').textContent = karyaList.length;
+            document.getElementById('stat-total-kategori').textContent = cats.length;
+            document.getElementById('stat-total-testimoni').textContent = testiList.length;
+            document.getElementById('stat-floating-wa').textContent = cmsData.floatingWaEnabled !== false ? 'Aktif' : 'Nonaktif';
+            document.getElementById('stat-wa-number').textContent = cmsData.whatsappDisplay || cmsData.whatsappNumber || '-';
+
+            document.getElementById('dash-brand-name').textContent = cmsData.brandName || 'ARCHIVE PHOTO';
+            document.getElementById('dash-cloud-status').textContent = (cmsData.gasWebhookUrl && cmsData.gasWebhookUrl.startsWith('http')) ? 'Terpasang' : 'Belum terhubung';
+            document.getElementById('dash-drive-status').textContent = cmsData.driveFolderId ? `${cmsData.driveFolderId.substring(0, 10)}...` : 'Belum diatur';
+
+            const recentWrap = document.getElementById('dash-recent-karya');
+            if (karyaList.length === 0) {
+                recentWrap.innerHTML = `<p class="text-xs text-zinc-500">Belum ada karya yang ditambahkan.</p>`;
+            } else {
+                recentWrap.innerHTML = karyaList.slice(0, 3).map((item, i) => `
+                    <div class="flex items-center justify-between gap-3 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/80 p-2.5 rounded-xl">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="text-[11px] font-bold text-zinc-400 w-4">#${i + 1}</span>
+                            <img src="${item.src}" class="w-9 h-9 rounded-lg object-cover shrink-0 bg-zinc-900">
+                            <div class="min-w-0">
+                                <p class="text-xs font-semibold text-zinc-900 dark:text-white truncate">${item.title}</p>
+                                <p class="text-[10px] text-zinc-500 truncate">${item.location || '-'} · ${item.year || '-'}</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 shrink-0">${item.category}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function populateForm() {
+            const fields = [
+                'brandName', 'logoUrl', 'heroTagline', 'heroTitle1', 'heroTitle2', 'heroTitle3', 'heroDesc', 'heroBg',
+                'aboutImg', 'aboutHeadline', 'aboutBio', 'pillar1Title', 'pillar1Desc', 'pillar2Title', 'pillar2Desc',
+                'aboutName', 'aboutRole', 'baBeforeImg', 'baAfterImg', 'whatsappNumber', 'whatsappDisplay',
+                'floatingWaText', 'floatingWaPrefill', 'email', 'address', 'instagramUrl',
+                'formSectionTitle', 'formSectionSubtitle', 'formSubmitText', 'gasWebhookUrl', 'driveFolderId'
+            ];
+            fields.forEach(f => {
+                const el = document.getElementById(`inp-${f}`);
+                if (el) el.value = cmsData[f] || '';
+            });
+
+            document.getElementById('inp-hideTextWhenLogoExists').checked = !!cmsData.hideTextWhenLogoExists;
+            document.getElementById('inp-baUseFilterOnBefore').checked = cmsData.baUseFilterOnBefore !== false;
+            document.getElementById('inp-floatingWaEnabled').checked = cmsData.floatingWaEnabled !== false;
+
+            document.getElementById('inp-sessionOptions').value = (cmsData.sessionOptions || []).join('\n');
+            document.getElementById('inp-outputOptions').value = (cmsData.outputOptions || []).join('\n');
+            document.getElementById('inp-budgetOptions').value = (cmsData.budgetOptions || []).join('\n');
+
+            document.getElementById('sec-question').value = secData.question || '';
+            document.getElementById('sec-answer').value = secData.answer || '';
+            document.getElementById('sec-recovery-email').value = secData.recoveryEmail || '';
+            document.getElementById('sec-recovery-code').value = secData.recoveryCode || '';
+
+            const logoPreview = document.getElementById('preview-logo');
+            if (cmsData.logoUrl) {
+                logoPreview.src = cmsData.logoUrl;
+                logoPreview.classList.remove('hidden');
+            }
+
+            renderGalleryEditor();
+            renderTestimonialsEditor();
+        }
+
+        // ==========================================
+        // SECURITY TAB ACTIONS
+        // ==========================================
+        function updateSecurityPin() {
+            const oldPin = document.getElementById('sec-old-pin').value.trim();
+            const newPin = document.getElementById('sec-new-pin').value.trim();
+            const confirmPin = document.getElementById('sec-confirm-pin').value.trim();
+
+            if (oldPin !== secData.pin) {
+                showAdminToast('PIN saat ini salah.');
+                return;
+            }
+            if (!/^\d{6}$/.test(newPin)) {
+                showAdminToast('PIN baru wajib 6 digit angka.');
+                return;
+            }
+            if (newPin !== confirmPin) {
+                showAdminToast('Konfirmasi PIN baru tidak cocok.');
+                return;
+            }
+
+            secData.pin = newPin;
+            saveSecurityStore();
+            document.getElementById('sec-old-pin').value = '';
+            document.getElementById('sec-new-pin').value = '';
+            document.getElementById('sec-confirm-pin').value = '';
+            showAdminToast('PIN 6 digit berhasil diperbarui!');
+        }
+
+        function regenerateRecoveryCode() {
+            const rand = Math.floor(1000 + Math.random() * 9000);
+            const chars = Math.random().toString(36).substring(2, 6).toUpperCase();
+            secData.recoveryCode = `ARC-${rand}-${chars}`;
+            document.getElementById('sec-recovery-code').value = secData.recoveryCode;
+            saveSecurityStore();
+            showAdminToast('Kode pemulihan darurat baru dibuat.');
+        }
+
+        function saveRecoverySettings() {
+            secData.question = document.getElementById('sec-question').value.trim() || DEFAULT_SECURITY.question;
+            secData.answer = document.getElementById('sec-answer').value.trim() || DEFAULT_SECURITY.answer;
+            secData.recoveryEmail = document.getElementById('sec-recovery-email').value.trim() || DEFAULT_SECURITY.recoveryEmail;
+            saveSecurityStore();
+            showAdminToast('Pengaturan pemulihan akun tersimpan.');
+        }
+
+        // ==========================================
+        // FAST CLIENT-SIDE IMAGE COMPRESSION + BATCH CLOUD UPLOAD
+        // ==========================================
+        function compressImageFile(file, maxDim = 1400, quality = 0.80) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error('Gagal membaca file'));
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onerror = () => reject(new Error('Format gambar tidak didukung'));
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width, h = img.height;
+                        if (w > maxDim || h > maxDim) {
+                            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+                            else { w = Math.round(w * maxDim / h); h = maxDim; }
+                        }
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        ctx.drawImage(img, 0, 0, w, h);
+
+                        const isPng = file.type === 'image/png';
+                        const dataUrl = isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', quality);
+                        resolve({
+                            dataUrl,
+                            base64Data: dataUrl.split(',')[1],
+                            mimeType: isPng ? 'image/png' : 'image/jpeg',
+                            fileName: file.name
+                        });
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function uploadSingleCompressedAsset(file) {
+            const compressed = await compressImageFile(file, 1400, 0.80);
+            const gasUrl = document.getElementById('inp-gasWebhookUrl')?.value.trim();
+            const folderId = document.getElementById('inp-driveFolderId')?.value.trim();
+
+            if (gasUrl && gasUrl.startsWith('http') && folderId) {
+                try {
+                    const res = await fetch(gasUrl, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'uploadImage',
+                            folderId: folderId,
+                            fileName: compressed.fileName,
+                            mimeType: compressed.mimeType,
+                            base64Data: compressed.base64Data
+                        })
+                    });
+                    const result = await res.json();
+                    if (result && result.url) {
+                        return result.url;
+                    }
+                } catch (err) {
+                    console.warn('Upload Drive fallback ke Base64 terkompresi:', err);
+                }
+            }
+            return compressed.dataUrl;
+        }
+
+        async function handleImageUpload(event, targetInputId, previewImgId = null) {
+            const file = event.target.files[0];
+            if (!file) return;
+            showAdminToast('Mengompresi & memproses gambar...');
+            const finalUrl = await uploadSingleCompressedAsset(file);
+            document.getElementById(targetInputId).value = finalUrl;
+            if (previewImgId) {
+                const prev = document.getElementById(previewImgId);
+                prev.src = finalUrl;
+                prev.classList.remove('hidden');
+            }
+            showAdminToast('Gambar berhasil dimuat!');
+        }
+
+        // ==========================================
+        // KARYA POPUP MODAL (BATCH MULTI-UPLOAD + REORDER + CATEGORY)
+        // ==========================================
+        function renderGalleryEditor() {
+            const cats = getAllCategories();
+            const filterBar = document.getElementById('admin-karya-filter-bar');
+            filterBar.innerHTML = ['ALL', ...cats].map(c => {
+                const isActive = adminGalleryFilter === c;
+                const label = c === 'ALL' ? `Semua (${cmsData.gallery.length})` : c;
+                const cls = isActive
+                    ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 transition-all'
+                    : 'px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all';
+                return `<button type="button" onclick="setAdminGalleryFilter('${c}')" class="${cls}">${label}</button>`;
+            }).join('');
+
+            const wrap = document.getElementById('gallery-editor-list');
+            const itemsWithIndex = cmsData.gallery
+                .map((item, originalIndex) => ({ item, originalIndex }))
+                .filter(entry => adminGalleryFilter === 'ALL' || (entry.item.category || '').toUpperCase() === adminGalleryFilter);
+
+            if (itemsWithIndex.length === 0) {
+                wrap.innerHTML = `<div class="text-center py-10 border border-dashed border-zinc-300 dark:border-zinc-800 rounded-2xl text-xs text-zinc-500">Belum ada karya pada kategori ini. Klik tombol <b>Tambah Karya</b> di atas.</div>`;
+                return;
+            }
+
+            wrap.innerHTML = itemsWithIndex.map(({ item, originalIndex }) => `
+                <div class="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 rounded-2xl p-3.5 flex items-center justify-between gap-4 transition-all duration-200">
+                    <div class="flex items-center gap-3.5 min-w-0">
+                        <div class="w-8 h-8 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-bold text-xs flex items-center justify-center shrink-0">
+                            ${originalIndex + 1}
+                        </div>
+
+                        <img src="${item.src}" class="w-12 h-16 object-cover rounded-lg bg-zinc-200 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 shrink-0"
+                             onerror="this.src='https://placehold.co/300x400/18181b/ffffff?text=Foto'">
+
+                        <div class="min-w-0 space-y-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h4 class="text-sm font-bold text-zinc-900 dark:text-white truncate">${item.title}</h4>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">${item.category}</span>
+                            </div>
+                            <p class="text-xs text-zinc-500 flex items-center gap-3">
+                                <span><i class="fa-solid fa-location-dot mr-1"></i>${item.location || '-'}</span>
+                                <span><i class="fa-regular fa-calendar mr-1"></i>${item.year || '-'}</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="moveGalleryItem(${originalIndex}, -1)" ${originalIndex === 0 ? 'disabled' : ''} title="Pindah ke Atas"
+                                class="w-8 h-8 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 flex items-center justify-center transition-colors">
+                            <i class="fa-solid fa-arrow-up text-xs"></i>
+                        </button>
+                        <button type="button" onclick="moveGalleryItem(${originalIndex}, 1)" ${originalIndex === cmsData.gallery.length - 1 ? 'disabled' : ''} title="Pindah ke Bawah"
+                                class="w-8 h-8 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 flex items-center justify-center transition-colors">
+                            <i class="fa-solid fa-arrow-down text-xs"></i>
+                        </button>
+                        <button type="button" onclick="openEditKaryaModal(${originalIndex})" title="Edit Karya"
+                                class="w-8 h-8 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-800 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-center transition-colors">
+                            <i class="fa-solid fa-pen text-xs"></i>
+                        </button>
+                        <button type="button" onclick="removeGalleryItem(${originalIndex})" title="Hapus Karya"
+                                class="w-8 h-8 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center transition-colors">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setAdminGalleryFilter(cat) {
+            adminGalleryFilter = cat;
+            renderGalleryEditor();
+        }
+
+        function moveGalleryItem(index, direction) {
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= cmsData.gallery.length) return;
+            const temp = cmsData.gallery[index];
+            cmsData.gallery[index] = cmsData.gallery[targetIndex];
+            cmsData.gallery[targetIndex] = temp;
+            renderGalleryEditor();
+            renderDashboard();
+        }
+
+        function populateModalCategoryDropdown(selectedCat = '') {
+            const cats = getAllCategories();
+            const select = document.getElementById('modal-karya-category');
+            select.innerHTML = cats.map(c => `<option value="${c}" ${c === selectedCat.toUpperCase() ? 'selected' : ''}>${c}</option>`).join('');
+        }
+
+        function openAddKaryaModal() {
+            batchUploadedUrls = [];
+            document.getElementById('karya-modal-title').textContent = 'Tambah Karya (Bisa Banyak Foto Sekaligus)';
+            document.getElementById('karya-modal-subtitle').textContent = 'Pilih beberapa foto sekaligus—setiap file akan otomatis dikompresi agar upload cepat.';
+            document.getElementById('modal-karya-index').value = '-1';
+            document.getElementById('batch-upload-section').classList.remove('hidden');
+            document.getElementById('single-edit-section').classList.add('hidden');
+            document.getElementById('batch-preview-wrap').classList.add('hidden');
+            document.getElementById('batch-preview-grid').innerHTML = '';
+            document.getElementById('modal-karya-multi-files').value = '';
+            document.getElementById('modal-karya-urls').value = '';
+            document.getElementById('modal-karya-title').value = '';
+            document.getElementById('modal-karya-location').value = '';
+            document.getElementById('modal-karya-year').value = new Date().getFullYear().toString();
+            populateModalCategoryDropdown();
+
+            const modal = document.getElementById('karya-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function openEditKaryaModal(idx) {
+            const item = cmsData.gallery[idx];
+            if (!item) return;
+            batchUploadedUrls = [];
+            document.getElementById('karya-modal-title').textContent = `Edit Karya #${idx + 1}`;
+            document.getElementById('karya-modal-subtitle').textContent = 'Perbarui informasi atau ganti foto untuk karya ini.';
+            document.getElementById('modal-karya-index').value = idx;
+            document.getElementById('batch-upload-section').classList.add('hidden');
+            document.getElementById('single-edit-section').classList.remove('hidden');
+            document.getElementById('modal-karya-src').value = item.src;
+            document.getElementById('modal-karya-preview').src = item.src;
+            document.getElementById('modal-karya-title').value = item.title;
+            document.getElementById('modal-karya-location').value = item.location || '';
+            document.getElementById('modal-karya-year').value = item.year || '';
+            populateModalCategoryDropdown(item.category);
+
+            const modal = document.getElementById('karya-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeKaryaModal() {
+            const modal = document.getElementById('karya-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        async function handleBatchKaryaFiles(event) {
+            const files = Array.from(event.target.files || []);
+            if (files.length === 0) return;
+
+            const wrap = document.getElementById('batch-preview-wrap');
+            const statusText = document.getElementById('batch-status-text');
+            const saveBtn = document.getElementById('btn-save-karya-modal');
+
+            wrap.classList.remove('hidden');
+            saveBtn.disabled = true;
+
+            const gasUrl = document.getElementById('inp-gasWebhookUrl')?.value.trim();
+            const folderId = document.getElementById('inp-driveFolderId')?.value.trim();
+            const useCloudBatch = gasUrl && gasUrl.startsWith('http') && folderId;
+
+            statusText.textContent = `Mengompresi ${files.length} foto...`;
+            const compressedList = [];
+            for (let i = 0; i < files.length; i++) {
+                statusText.textContent = `Mengompresi foto ${i + 1} dari ${files.length}...`;
+                const comp = await compressImageFile(files[i], 1400, 0.80);
+                compressedList.push(comp);
+            }
+
+            if (useCloudBatch) {
+                try {
+                    statusText.textContent = `Mengunggah ${compressedList.length} foto terkompresi ke Google Drive...`;
+                    const res = await fetch(gasUrl, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'uploadBatchImages',
+                            folderId: folderId,
+                            files: compressedList.map(c => ({
+                                fileName: c.fileName,
+                                mimeType: c.mimeType,
+                                base64Data: c.base64Data
+                            }))
+                        })
+                    });
+                    const result = await res.json();
+                    if (result && Array.isArray(result.urls) && result.urls.length > 0) {
+                        batchUploadedUrls.push(...result.urls);
+                        statusText.textContent = `${batchUploadedUrls.length} foto berhasil diunggah ke Google Drive!`;
+                        renderBatchPreviewGrid();
+                        saveBtn.disabled = false;
+                        return;
+                    }
+                } catch (err) {
+                    console.warn('Batch cloud upload fallback ke Base64 lokal:', err);
+                }
+            }
+
+            compressedList.forEach(c => batchUploadedUrls.push(c.dataUrl));
+            statusText.textContent = `${batchUploadedUrls.length} foto terkompresi siap disimpan!`;
+            renderBatchPreviewGrid();
+            saveBtn.disabled = false;
+        }
+
+        function renderBatchPreviewGrid() {
+            const grid = document.getElementById('batch-preview-grid');
+            const statusText = document.getElementById('batch-status-text');
+            statusText.textContent = `${batchUploadedUrls.length} foto siap disimpan`;
+
+            grid.innerHTML = batchUploadedUrls.map((url, idx) => `
+                <div class="relative group rounded-xl overflow-hidden border border-zinc-300 dark:border-zinc-800 aspect-[3/4] bg-zinc-900">
+                    <img src="${url}" class="w-full h-full object-cover">
+                    <span class="absolute top-1 left-1 bg-black/75 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">#${idx + 1}</span>
+                    <button type="button" onclick="removeBatchQueueItem(${idx})" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600 text-white text-[10px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function removeBatchQueueItem(idx) {
+            batchUploadedUrls.splice(idx, 1);
+            if (batchUploadedUrls.length === 0) {
+                document.getElementById('batch-preview-wrap').classList.add('hidden');
+            } else {
+                renderBatchPreviewGrid();
+            }
+        }
+
+        function clearBatchQueue() {
+            batchUploadedUrls = [];
+            document.getElementById('modal-karya-multi-files').value = '';
+            document.getElementById('batch-preview-wrap').classList.add('hidden');
+            document.getElementById('batch-preview-grid').innerHTML = '';
+        }
+
+        async function handleSingleEditKaryaFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            showAdminToast('Mengompresi & mengunggah foto pengganti...');
+            const finalUrl = await uploadSingleCompressedAsset(file);
+            document.getElementById('modal-karya-src').value = finalUrl;
+            document.getElementById('modal-karya-preview').src = finalUrl;
+            showAdminToast('Foto pengganti berhasil dimuat!');
+        }
+
+        function saveKaryaFromModal(e) {
+            e.preventDefault();
+            const idx = parseInt(document.getElementById('modal-karya-index').value);
+            const title = document.getElementById('modal-karya-title').value.trim();
+            const category = document.getElementById('modal-karya-category').value.toUpperCase();
+            const location = document.getElementById('modal-karya-location').value.trim();
+            const year = document.getElementById('modal-karya-year').value.trim();
+
+            if (idx >= 0) {
+                const src = document.getElementById('modal-karya-src').value.trim();
+                if (!src) {
+                    showAdminToast('Foto karya tidak boleh kosong.');
+                    return;
+                }
+                cmsData.gallery[idx] = { src, title, category, location, year };
+                showAdminToast('Karya berhasil diperbarui! Klik Simpan untuk menerapkan ke web.');
+            } else {
+                const manualUrls = document.getElementById('modal-karya-urls').value
+                    .split('\n').map(u => u.trim()).filter(Boolean);
+                const allSources = [...batchUploadedUrls, ...manualUrls];
+
+                if (allSources.length === 0) {
+                    showAdminToast('Pilih minimal 1 foto atau masukkan URL foto terlebih dahulu.');
+                    return;
+                }
+
+                const newItems = allSources.map(srcUrl => ({
+                    src: srcUrl,
+                    title,
+                    category,
+                    location,
+                    year
+                }));
+                cmsData.gallery.unshift(...newItems);
+                showAdminToast(`${newItems.length} karya berhasil ditambahkan! Klik Simpan untuk menerapkan.`);
+            }
+
+            closeKaryaModal();
+            renderGalleryEditor();
+            renderDashboard();
+        }
+
+        function removeGalleryItem(idx) {
+            if (!confirm(`Hapus karya "${cmsData.gallery[idx]?.title}"?`)) return;
+            cmsData.gallery.splice(idx, 1);
+            renderGalleryEditor();
+            renderDashboard();
+        }
+
+        // Category Modal Handlers
+        function openCategoryModal(mode = 'manage') {
+            renderCategoryModalList();
+            const modal = document.getElementById('category-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            if (mode === 'add') {
+                setTimeout(() => document.getElementById('new-category-input').focus(), 100);
+            }
+        }
+
+        function closeCategoryModal() {
+            const modal = document.getElementById('category-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function renderCategoryModalList() {
+            const cats = getAllCategories();
+            const wrap = document.getElementById('category-list-container');
+            wrap.innerHTML = cats.map(cat => {
+                const count = cmsData.gallery.filter(g => (g.category || '').toUpperCase() === cat).length;
+                return `
+                    <div class="flex items-center justify-between bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-3.5 py-2 rounded-xl text-xs">
+                        <div>
+                            <span class="font-semibold text-zinc-900 dark:text-white">${cat}</span>
+                            <span class="text-zinc-500 ml-2">(${count} karya)</span>
+                        </div>
+                        <button type="button" onclick="deleteCategory('${cat}')" class="text-red-600 dark:text-red-400 hover:opacity-80 px-2 py-1">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addNewCategory(e) {
+            e.preventDefault();
+            const input = document.getElementById('new-category-input');
+            const val = input.value.trim().toUpperCase();
+            if (!val) return;
+            if (!cmsData.galleryCategories) cmsData.galleryCategories = getAllCategories();
+            if (!cmsData.galleryCategories.includes(val)) {
+                cmsData.galleryCategories.push(val);
+            }
+            input.value = '';
+            renderCategoryModalList();
+            renderGalleryEditor();
+            renderDashboard();
+            showAdminToast(`Kategori "${val}" berhasil ditambahkan.`);
+        }
+
+        function deleteCategory(catName) {
+            if (!confirm(`Hapus kategori "${catName}" dari daftar?`)) return;
+            cmsData.galleryCategories = getAllCategories().filter(c => c !== catName);
+            renderCategoryModalList();
+            renderGalleryEditor();
+            renderDashboard();
+        }
+
+        // ==========================================
+        // OUR CLIENT HAPPY (TESTIMONI POPUP MODERN)
+        // ==========================================
+        function renderTestimonialsEditor() {
+            const wrap = document.getElementById('testimonials-editor-list');
+            const list = cmsData.testimonials || [];
+
+            if (list.length === 0) {
+                wrap.innerHTML = `<div class="md:col-span-2 text-center py-10 border border-dashed border-zinc-300 dark:border-zinc-800 rounded-2xl text-xs text-zinc-500">Belum ada testimoni klien. Klik tombol <b>Tambah Testimoni</b> di atas.</div>`;
+                return;
+            }
+
+            wrap.innerHTML = list.map((t, idx) => `
+                <div class="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 rounded-2xl p-5 flex flex-col justify-between gap-4 transition-all duration-200">
+                    <div class="space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">#${idx + 1}</span>
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" onclick="openEditTestiModal(${idx})" title="Edit Testimoni"
+                                        class="w-8 h-8 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-800 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-center transition-colors">
+                                    <i class="fa-solid fa-pen text-xs"></i>
+                                </button>
+                                <button type="button" onclick="removeTestimonialItem(${idx})" title="Hapus Testimoni"
+                                        class="w-8 h-8 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center transition-colors">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-xs text-zinc-700 dark:text-zinc-300 italic leading-relaxed line-clamp-3">"${t.quote}"</p>
+                    </div>
+                    <div class="border-t border-zinc-200 dark:border-zinc-800/80 pt-3">
+                        <h4 class="text-sm font-bold text-zinc-900 dark:text-white">${t.author}</h4>
+                        <p class="text-[11px] text-zinc-500 mt-0.5">${t.event || t.role || 'Wedding Client'}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openAddTestiModal() {
+            document.getElementById('testi-modal-title').textContent = 'Tambah Testimoni Klien';
+            document.getElementById('modal-testi-index').value = '-1';
+            document.getElementById('modal-testi-author').value = '';
+            document.getElementById('modal-testi-event').value = '';
+            document.getElementById('modal-testi-quote').value = '';
+
+            const modal = document.getElementById('testi-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function openEditTestiModal(idx) {
+            const item = cmsData.testimonials[idx];
+            if (!item) return;
+            document.getElementById('testi-modal-title').textContent = `Edit Testimoni #${idx + 1}`;
+            document.getElementById('modal-testi-index').value = idx;
+            document.getElementById('modal-testi-author').value = item.author;
+            document.getElementById('modal-testi-event').value = item.event || item.role || '';
+            document.getElementById('modal-testi-quote').value = item.quote;
+
+            const modal = document.getElementById('testi-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeTestiModal() {
+            const modal = document.getElementById('testi-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function saveTestiFromModal(e) {
+            e.preventDefault();
+            const idx = parseInt(document.getElementById('modal-testi-index').value);
+            const newTesti = {
+                author: document.getElementById('modal-testi-author').value.trim(),
+                event: document.getElementById('modal-testi-event').value.trim(),
+                quote: document.getElementById('modal-testi-quote').value.trim()
+            };
+
+            if (!cmsData.testimonials) cmsData.testimonials = [];
+
+            if (idx >= 0) {
+                cmsData.testimonials[idx] = newTesti;
+                showAdminToast('Testimoni berhasil diperbarui! Klik Simpan untuk menerapkan.');
+            } else {
+                cmsData.testimonials.unshift(newTesti);
+                showAdminToast('Testimoni baru ditambahkan! Klik Simpan untuk menerapkan.');
+            }
+
+            closeTestiModal();
+            renderTestimonialsEditor();
+            renderDashboard();
+        }
+
+        function removeTestimonialItem(idx) {
+            if (!confirm(`Hapus testimoni dari "${cmsData.testimonials[idx]?.author}"?`)) return;
+            cmsData.testimonials.splice(idx, 1);
+            renderTestimonialsEditor();
+            renderDashboard();
+        }
+
+        // ==========================================
+        // SYNC SEKARANG & CLOUD DIAGNOSTICS
+        // ==========================================
+        async function syncNow() {
+            const gasUrl = document.getElementById('inp-gasWebhookUrl').value.trim();
+            const icon = document.getElementById('sync-now-icon');
+            const btn = document.getElementById('btn-sync-now');
+
+            if (!gasUrl || !gasUrl.startsWith('http')) {
+                showAdminToast('Isi Google Apps Script Web App URL terlebih dahulu.');
+                return;
+            }
+
+            icon.classList.add('fa-spin');
+            btn.disabled = true;
+
+            try {
+                collectFormToCmsData();
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(cmsData));
+
+                await fetch(gasUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'saveConfig', payload: cmsData })
+                });
+
+                showAdminToast('Sinkronisasi ke Cloud berhasil dijalankan!');
+            } catch (err) {
+                showAdminToast('Gagal melakukan sinkronisasi: ' + err.message);
+            } finally {
+                icon.classList.remove('fa-spin');
+                btn.disabled = false;
+            }
+        }
+
+        async function testCloudConnection() {
+            const gasUrl = document.getElementById('inp-gasWebhookUrl').value.trim();
+            const folderId = document.getElementById('inp-driveFolderId').value.trim();
+            const resultBox = document.getElementById('conn-test-result');
+            const btn = document.getElementById('btn-test-conn');
+
+            resultBox.classList.remove('hidden');
+            resultBox.className = "rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 p-4 text-xs space-y-1.5 font-mono text-zinc-700 dark:text-zinc-300";
+            resultBox.innerHTML = `<div class="flex items-center gap-2"><i class="fa-solid fa-circle-notch fa-spin"></i> Menguji koneksi ke server & memeriksa parameter...</div>`;
+            btn.disabled = true;
+
+            let logs = [];
+            let hasError = false;
+
+            if (!folderId) {
+                logs.push(`⚠️ [Google Drive Folder ID]: Belum diisi (Opsional jika hanya pakai Base64 lokal).`);
+            } else if (/^[a-zA-Z0-9_-]{15,}$/.test(folderId)) {
+                logs.push(`✅ [Google Drive Folder ID]: Format ID valid (${folderId.substring(0, 8)}...).`);
+            } else {
+                logs.push(`❌ [Google Drive Folder ID]: Format ID tampak tidak valid.`);
+                hasError = true;
+            }
+
+            if (!gasUrl) {
+                logs.push(`❌ [Apps Script URL]: URL belum diisi.`);
+                hasError = true;
+            } else if (!gasUrl.startsWith('https://script.google.com/')) {
+                logs.push(`❌ [Apps Script URL]: Harus diawali dengan https://script.google.com/...`);
+                hasError = true;
+            } else {
+                const startTime = performance.now();
+                try {
+                    const response = await fetch(gasUrl, { method: 'GET', cache: 'no-store' });
+                    const latency = Math.round(performance.now() - startTime);
+                    if (response.ok) {
+                        const text = await response.text();
+                        let isJson = false;
+                        try { JSON.parse(text); isJson = true; } catch {}
+                        logs.push(`✅ [Apps Script API]: Terhubung! Status HTTP ${response.status} (${latency} ms).`);
+                        logs.push(isJson
+                            ? `✅ [Format Respons]: JSON valid terdeteksi, siap sinkronisasi dua arah.`
+                            : `⚠️ [Format Respons]: Server aktif, namun respons bukan JSON.`);
+                    } else {
+                        logs.push(`❌ [Apps Script API]: Server merespons dengan error HTTP ${response.status}.`);
+                        hasError = true;
+                    }
+                } catch (err) {
+                    logs.push(`❌ [Apps Script API]: Gagal terhubung (${err.message}). Pastikan Web App di-deploy dengan akses "Anyone".`);
+                    hasError = true;
+                }
+            }
+
+            resultBox.className = hasError
+                ? "rounded-xl border border-red-500/40 bg-red-500/5 p-4 text-xs space-y-1.5 font-mono text-red-700 dark:text-red-300"
+                : "rounded-xl border border-emerald-500/40 bg-emerald-500/5 p-4 text-xs space-y-1.5 font-mono text-emerald-700 dark:text-emerald-300";
+
+            resultBox.innerHTML = logs.map(line => `<div>${line}</div>`).join('');
+            btn.disabled = false;
+        }
+
+        // ==========================================
+        // COLLECT & SAVE ALL CHANGES
+        // ==========================================
+        function collectFormToCmsData() {
+            const fields = [
+                'brandName', 'logoUrl', 'heroTagline', 'heroTitle1', 'heroTitle2', 'heroTitle3', 'heroDesc', 'heroBg',
+                'aboutImg', 'aboutHeadline', 'aboutBio', 'pillar1Title', 'pillar1Desc', 'pillar2Title', 'pillar2Desc',
+                'aboutName', 'aboutRole', 'baBeforeImg', 'baAfterImg', 'whatsappNumber', 'whatsappDisplay',
+                'floatingWaText', 'floatingWaPrefill', 'email', 'address', 'instagramUrl',
+                'formSectionTitle', 'formSectionSubtitle', 'formSubmitText', 'gasWebhookUrl', 'driveFolderId'
+            ];
+            fields.forEach(f => {
+                const el = document.getElementById(`inp-${f}`);
+                if (el) cmsData[f] = el.value;
+            });
+
+            cmsData.hideTextWhenLogoExists = document.getElementById('inp-hideTextWhenLogoExists').checked;
+            cmsData.baUseFilterOnBefore = document.getElementById('inp-baUseFilterOnBefore').checked;
+            cmsData.floatingWaEnabled = document.getElementById('inp-floatingWaEnabled').checked;
+
+            cmsData.sessionOptions = document.getElementById('inp-sessionOptions').value.split('\n').map(s => s.trim()).filter(Boolean);
+            cmsData.outputOptions = document.getElementById('inp-outputOptions').value.split('\n').map(s => s.trim()).filter(Boolean);
+            cmsData.budgetOptions = document.getElementById('inp-budgetOptions').value.split('\n').map(s => s.trim()).filter(Boolean);
+            cmsData.galleryCategories = getAllCategories();
+        }
+
+        async function saveAllChanges() {
+            collectFormToCmsData();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cmsData));
+            renderDashboard();
+
+            if (cmsData.gasWebhookUrl && cmsData.gasWebhookUrl.startsWith('http')) {
+                try {
+                    await fetch(cmsData.gasWebhookUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'saveConfig', payload: cmsData })
+                    });
+                    showAdminToast('Tersimpan lokal & disinkronkan ke Cloud GAS!');
+                    return;
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
+            showAdminToast('Semua perubahan tersimpan & langsung aktif di index.html!');
+        }
+
+        function exportConfigJSON() {
+            const blob = new Blob([JSON.stringify(cmsData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'archive-photo-config.json';
+            a.click();
+        }
+
+        function importConfigJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    cmsData = JSON.parse(e.target.result);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(cmsData));
+                    populateForm();
+                    renderDashboard();
+                    showAdminToast('Konfigurasi berhasil di-import!');
+                } catch {
+                    alert('File JSON tidak valid.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetToDefault() {
+            if (confirm('Kembalikan semua pengaturan ke default Archive Photo?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                cmsData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+                populateForm();
+                renderDashboard();
+                showAdminToast('Reset ke pengaturan awal berhasil.');
+            }
+        }
+
+        function showAdminToast(msg) {
+            const t = document.getElementById('admin-toast');
+            t.textContent = msg;
+            t.classList.remove('translate-y-20', 'opacity-0');
+            t.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                t.classList.add('translate-y-20', 'opacity-0');
+                t.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+
+        if (sessionStorage.getItem(SESSION_KEY) === 'true') {
+            enterAdminWorkspace();
+        }
+    </script>
+</body>
+</html>
